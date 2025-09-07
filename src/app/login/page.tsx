@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,11 +9,39 @@ import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import { FcGoogle } from 'react-icons/fc';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
+        const session = await authClient.getSession();
+        if (session?.data?.user) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        setCheckingSession(false);
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
+  if (checkingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +59,7 @@ export default function LoginPage() {
       }
 
       // Redirect to dashboard on successful login
-      window.location.href = '/user/dashboard';
+      window.location.href = '/dashboard';
     } catch (error) {
       console.error('Login error:', error);
       toast.error('An error occurred during login');
@@ -43,7 +72,7 @@ export default function LoginPage() {
     try {
       const { data, error } = await authClient.signIn.social({
         provider: 'google',
-        callbackURL: `${window.location.origin}/user/dashboard`,
+        callbackURL: `${window.location.origin}/dashboard`,
         disableRedirect: true,
       });
 

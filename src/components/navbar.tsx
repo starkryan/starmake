@@ -23,21 +23,22 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { toast } from "sonner"
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
-  { href: "/", label: "Home", active: true },
-  { href: "/user/dashboard", label: "Redeem" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/#about", label: "About" },
+  { href: "/", label: "Home" },
+  { href: "/tasks", label: "Tasks" },
+  { href: "/redeem", label: "Redeem" },
+  { href: "/profile", label: "Profile" },
 ]
 
 export default function Component() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleSignOut = async () => {
     try {
@@ -114,8 +115,7 @@ export default function Component() {
                     <NavigationMenuItem key={index} className="w-full">
                       <NavigationMenuLink
                         href={link.href}
-                        className="py-1.5"
-                        active={link.active}
+                        className={pathname === link.href ? "text-primary py-1.5" : "text-muted-foreground py-1.5"}
                       >
                         {link.label}
                       </NavigationMenuLink>
@@ -136,9 +136,8 @@ export default function Component() {
                 {navigationLinks.map((link, index) => (
                   <NavigationMenuItem key={index}>
                     <NavigationMenuLink
-                      active={link.active}
                       href={link.href}
-                      className="text-muted-foreground hover:text-primary py-1.5 font-medium"
+                      className={pathname === link.href ? "text-primary hover:text-primary py-1.5 font-medium" : "text-muted-foreground hover:text-primary py-1.5 font-medium"}
                     >
                       {link.label}
                     </NavigationMenuLink>
@@ -172,10 +171,19 @@ export default function Component() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <a href="/user/dashboard">Dashboard</a>
+                  <a href="/">Home</a>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <a href="/user/redeem">Redeem Code</a>
+                  <a href="/tasks">Tasks</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="/redeem">Redeem</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="/profile">Profile</a>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <a href="/dashboard">Dashboard</a>
                 </DropdownMenuItem>
                 {userRole === 'admin' && (
                   <DropdownMenuItem asChild>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/navbar";
+import BottomNavigation from "@/components/bottom-nav";
 import { Footerdemo } from "@/components/ui/footer-section";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
       >
         <Navbar />
         {children}
+        <BottomNavigation />
         <Footerdemo />
         <Toaster />
       </body>

@@ -16,32 +16,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
-import { supabase } from '@/lib/supabase';
 import { authClient } from '@/lib/auth-client';
-import AuthProtected from '@/components/auth-protected';
+import AuthProtected from '@/components/auth/auth-protected';
 import { toast } from 'sonner';
 import { Spinner } from '@/components/ui/spinner';
-
-interface RedeemRequest {
-  id: string;
-  salary_code_id: string;
-  user_name: string;
-  user_phone: string;
-  upi_id: string;
-  status: string;
-  created_at: string;
-  approved_at: string | null;
-  rejected_at: string | null;
-  salary_codes?: {
-    code: string;
-    task: string;
-    price: number;
-  }[];
-}
+import { useRedeemRequests } from '@/hooks/use-redeem-requests';
+import { useTaskSubmissions } from '@/hooks/tasks/use-task-submissions';
+import { RedeemRequest, TaskSubmission } from '@/types';
 
 function UserDashboardContent() {
-  const [redeemRequests, setRedeemRequests] = useState<RedeemRequest[]>([]);
-  const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
@@ -53,8 +36,12 @@ function UserDashboardContent() {
   });
   const [submitting, setSubmitting] = useState(false);
 
+  const { redeemRequests, loading: redeemLoading, error: redeemError, refetch: refetchRedeem } = useRedeemRequests(userId);
+  const { taskSubmissions, loading: taskLoading, error: taskError, refetch: refetchTasks } = useTaskSubmissions(userId);
+
+  const loading = redeemLoading || taskLoading;
+
   useEffect(() => {
-    // Fetch session first to get user ID
     const fetchSession = async () => {
       try {
         const session = await authClient.getSession();
@@ -68,39 +55,6 @@ function UserDashboardContent() {
     };
     fetchSession();
   }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchUserRequests();
-    }
-  }, [userId]);
-
-  const fetchUserRequests = async () => {
-    try {
-      if (!userId) {
-        setRedeemRequests([]);
-        setLoading(false);
-        return;
-      }
-
-      // Filter requests by the logged-in user's ID
-      const { data, error } = await supabase
-        .from('redeem_requests')
-        .select(`
-          *,
-          salary_codes!inner (code, task, price)
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setRedeemRequests(data || []);
-    } catch (error) {
-      console.error('Error fetching redemption requests:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -147,7 +101,7 @@ function UserDashboardContent() {
       // After successful submission, close modal and refresh requests
       setIsRedeemModalOpen(false);
       setRedeemForm({ salaryCode: '', upiId: '', userName: '', userPhone: '' });
-      await fetchUserRequests();
+      await refetchRedeem();
     } catch (error) {
       console.error('Error redeeming code:', error);
       toast.error(error instanceof Error ? error.message : 'Error redeeming code');
@@ -183,23 +137,23 @@ function UserDashboardContent() {
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                Total Requests
+                Total Redemptions
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{redeemRequests.length}</div>
-              <p className="text-xs text-muted-foreground">All time redemption requests</p>
+              <p className="text-xs text-muted-foreground">Salary code redemptions</p>
             </CardContent>
           </Card>
 
           <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">
-                Approved
+                Approved Redemptions
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -210,15 +164,27 @@ function UserDashboardContent() {
             </CardContent>
           </Card>
 
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-purple-600 dark:text-purple-400">
+                Task Submissions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">{taskSubmissions.length}</div>
+              <p className="text-xs text-muted-foreground">Completed tasks</p>
+            </CardContent>
+          </Card>
+
           <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-amber-600 dark:text-amber-400">
-                Pending
+                Pending Tasks
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {redeemRequests.filter(r => r.status === 'pending').length}
+                {taskSubmissions.filter(t => t.status === 'pending').length}
               </div>
               <p className="text-xs text-muted-foreground">Awaiting approval</p>
             </CardContent>
@@ -366,6 +332,76 @@ function UserDashboardContent() {
                             {request.approved_at && new Date(request.approved_at).toLocaleDateString()}
                             {request.rejected_at && new Date(request.rejected_at).toLocaleDateString()}
                             {!request.approved_at && !request.rejected_at && '-'}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Task Submissions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Task Submissions</CardTitle>
+            <CardDescription>Track the status of your completed tasks</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {taskSubmissions.length === 0 ? (
+              <div className="text-center py-12 space-y-4">
+                <div className="text-muted-foreground">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium">No task submissions</h3>
+                <p className="text-sm text-muted-foreground">
+                  Complete tasks to see your submissions here.
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Task</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Proof</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Submitted</TableHead>
+                      <TableHead>Last Update</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {taskSubmissions.map((submission) => {
+                      // Handle both array and object formats for tasks
+                      let task;
+                      if (Array.isArray(submission.tasks)) {
+                        task = submission.tasks[0];
+                      } else {
+                        task = submission.tasks;
+                      }
+                      
+                      return (
+                        <TableRow key={submission.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{task?.title || 'Unknown Task'}</TableCell>
+                          <TableCell className="capitalize">{task?.task_type || '-'}</TableCell>
+                          <TableCell className="max-w-xs truncate text-muted-foreground">
+                            {submission.submission_proof?.proof || 'No proof provided'}
+                          </TableCell>
+                          <TableCell>
+                            {getStatusBadge(submission.status)}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(submission.created_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {submission.approved_at && new Date(submission.approved_at).toLocaleDateString()}
+                            {submission.rejected_at && new Date(submission.rejected_at).toLocaleDateString()}
+                            {!submission.approved_at && !submission.rejected_at && '-'}
                           </TableCell>
                         </TableRow>
                       );

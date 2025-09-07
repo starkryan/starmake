@@ -4,7 +4,13 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -17,11 +23,31 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
-import AuthProtected from '@/components/auth-protected';
+import AuthProtected from '@/components/auth/auth-protected';
 import { Spinner } from '@/components/ui/spinner';
+import { 
+  Users, 
+  CreditCard, 
+  FileText, 
+  Settings, 
+  PlusCircle,
+  CheckCircle,
+  XCircle,
+  ArrowLeft,
+  BarChart3
+} from 'lucide-react';
 
 interface SalaryCode {
   id: string;
@@ -51,7 +77,14 @@ interface RedeemRequest {
   upi_id: string;
   status: string;
   created_at: string;
-  salary_code?: SalaryCode;
+  salary_codes?: SalaryCode[];
+}
+
+interface User {
+  id: string;
+  email: string;
+  role: string;
+  created_at: string;
 }
 
 function AdminDashboardContent() {
@@ -189,181 +222,274 @@ function AdminDashboardContent() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <BarChart3 className="h-8 w-8 text-primary" />
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" className="gap-2">
+            <a href="/admin/users">
+              <Users className="h-4 w-4" />
+              Manage Users
+            </a>
+          </Button>
+          <Button asChild variant="outline" className="gap-2">
+            <a href="/admin/tasks">
+              <FileText className="h-4 w-4" />
+              Tasks
+            </a>
+          </Button>
+        </div>
+      </div>
 
-      {/* Generate Salary Code Form */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Generate Salary Code</CardTitle>
-          <CardDescription>Create a new 9-digit salary code</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(generateSalaryCode)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Phone</FormLabel>
-                      <FormControl>
-                        <Input type="tel" placeholder="Enter phone number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="task"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Task Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Describe the task" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (₹)</FormLabel>
-                    <FormControl>
-                      <Input type="number" step="0.01" placeholder="Enter price" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit">Generate Salary Code</Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 lg:w-[400px]">
+          <TabsTrigger value="overview" className="gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="codes" className="gap-2">
+            <CreditCard className="h-4 w-4" />
+            Salary Codes
+          </TabsTrigger>
+          <TabsTrigger value="requests" className="gap-2">
+            <FileText className="h-4 w-4" />
+            Requests
+          </TabsTrigger>
+          <TabsTrigger value="generate" className="gap-2">
+            <PlusCircle className="h-4 w-4" />
+            Generate
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Redeem Requests */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Redeem Requests</CardTitle>
-          <CardDescription>Pending redemption requests awaiting approval</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>UPI ID</TableHead>
-                <TableHead>Salary Code</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {redeemRequests.map((request) => (
-                <TableRow key={request.id}>
-                  <TableCell>{request.user_name}</TableCell>
-                  <TableCell>{request.user_phone}</TableCell>
-                  <TableCell>{request.upi_id}</TableCell>
-                  <TableCell>{request.salary_code?.code}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      request.status === 'approved' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {request.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    {request.status === 'pending' && (
-                      <div className="space-x-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleApproveRequest(request.id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleRejectRequest(request.id)}
-                        >
-                          Reject
-                        </Button>
-                      </div>
+        <TabsContent value="overview">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                <Users className="h-4 w-4 text-blue-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">6</div>
+                <p className="text-xs text-muted-foreground">Registered users</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Salary Codes</CardTitle>
+                <CreditCard className="h-4 w-4 text-green-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{salaryCodes.length}</div>
+                <p className="text-xs text-muted-foreground">Generated codes</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
+                <FileText className="h-4 w-4 text-amber-600" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">
+                  {redeemRequests.filter(r => r.status === 'pending').length}
+                </div>
+                <p className="text-xs text-muted-foreground">Awaiting approval</p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="codes">
+          <Card>
+            <CardHeader>
+              <CardTitle>Generated Salary Codes</CardTitle>
+              <CardDescription>All salary codes created by the system</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Code</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Task</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {salaryCodes.map((code) => (
+                    <TableRow key={code.id}>
+                      <TableCell className="font-mono font-medium">{code.code}</TableCell>
+                      <TableCell>{code.name}</TableCell>
+                      <TableCell>{code.phone}</TableCell>
+                      <TableCell className="max-w-xs truncate">{code.task}</TableCell>
+                      <TableCell className="font-medium">₹{code.price}</TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          code.status === 'active' ? 'default' :
+                          code.status === 'redeemed' ? 'secondary' : 'outline'
+                        }>
+                          {code.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(code.created_at).toLocaleDateString()}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="requests">
+          <Card>
+            <CardHeader>
+              <CardTitle>Redeem Requests</CardTitle>
+              <CardDescription>Manage redemption requests from users</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>UPI ID</TableHead>
+                    <TableHead>Salary Code</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {redeemRequests.map((request) => (
+                    <TableRow key={request.id}>
+                      <TableCell className="font-medium">{request.user_name}</TableCell>
+                      <TableCell>{request.user_phone}</TableCell>
+                      <TableCell className="max-w-xs truncate">{request.upi_id}</TableCell>
+                      <TableCell className="font-mono">
+                        {request.salary_codes?.[0]?.code}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={
+                          request.status === 'pending' ? 'secondary' :
+                          request.status === 'approved' ? 'default' : 'destructive'
+                        }>
+                          {request.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {request.status === 'pending' && (
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleApproveRequest(request.id)}
+                              className="gap-1"
+                            >
+                              <CheckCircle className="h-3 w-3" />
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleRejectRequest(request.id)}
+                              className="gap-1"
+                            >
+                              <XCircle className="h-3 w-3" />
+                              Reject
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="generate">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <PlusCircle className="h-5 w-5" />
+                Generate Salary Code
+              </CardTitle>
+              <CardDescription>Create a new 9-digit salary code for tasks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(generateSalaryCode)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" placeholder="Enter phone number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="task"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Task Description</FormLabel>
+                        <FormControl>
+                          <Textarea placeholder="Describe the task" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Generated Salary Codes */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Generated Salary Codes</CardTitle>
-          <CardDescription>All salary codes created by the system</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Task</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {salaryCodes.map((code) => (
-                <TableRow key={code.id}>
-                  <TableCell className="font-mono">{code.code}</TableCell>
-                  <TableCell>{code.name}</TableCell>
-                  <TableCell>{code.phone}</TableCell>
-                  <TableCell className="max-w-xs truncate">{code.task}</TableCell>
-                  <TableCell>₹{code.price}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded text-xs ${
-                      code.status === 'active' ? 'bg-green-100 text-green-800' :
-                      code.status === 'redeemed' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {code.status}
-                    </span>
-                  </TableCell>
-                  <TableCell>{new Date(code.created_at).toLocaleDateString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+                  />
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price (₹)</FormLabel>
+                        <FormControl>
+                          <Input type="number" step="0.01" placeholder="Enter price" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button type="submit" className="gap-2">
+                    <PlusCircle className="h-4 w-4" />
+                    Generate Salary Code
+                  </Button>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

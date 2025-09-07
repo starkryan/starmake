@@ -26,7 +26,7 @@ export default function AuthProtected({ children, requireAdmin = false }: AuthPr
         }
 
         if (requireAdmin && (session.user as any).role !== 'admin') {
-          router.push('/user/dashboard');
+          router.push('/dashboard');
           return;
         }
 
