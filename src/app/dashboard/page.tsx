@@ -44,7 +44,15 @@ function formatDate(input?: string) {
   try { return new Date(input).toLocaleDateString(); } catch { return input as string; }
 }
 
-export default function UserDashboardContent() {
+export default function UserDashboard() {
+  return (
+    <AuthProtected>
+      <UserDashboardContent />
+    </AuthProtected>
+  )
+}
+
+function UserDashboardContent() {
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
@@ -407,13 +415,5 @@ export default function UserDashboardContent() {
         <div className='h-16 md:hidden -mt-8' />
       </div>
     </div>
-  );
-}
-
-export function UserDashboard() {
-  return (
-    <AuthProtected>
-      <UserDashboardContent />
-    </AuthProtected>
   );
 }
