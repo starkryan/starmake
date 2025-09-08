@@ -56,7 +56,15 @@ function getTaskTypeConfig(taskType: string) {
   return configMap[taskType] || { label: taskType, icon: <FaQuestion className="w-3 h-3" /> }
 }
 
-export default function AdminTasksContent() {
+export default function AdminTasks() {
+  return (
+    <AuthProtected requireAdmin={true}>
+      <AdminTasksContent />
+    </AuthProtected>
+  )
+}
+
+function AdminTasksContent() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -299,13 +307,5 @@ export default function AdminTasksContent() {
         </CardContent>
       </Card>
     </div>
-  )
-}
-
-export function AdminTasks() {
-  return (
-    <AuthProtected requireAdmin={true}>
-      <AdminTasksContent />
-    </AuthProtected>
   )
 }

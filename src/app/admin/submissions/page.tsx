@@ -51,7 +51,15 @@ function formatDate(input?: string) {
   }
 }
 
-export default function AdminSubmissionsContent() {
+export default function AdminSubmissionsPage() {
+  return (
+    <AuthProtected requireAdmin={true}>
+      <AdminSubmissionsContent />
+    </AuthProtected>
+  )
+}
+
+function AdminSubmissionsContent() {
   const [submissions, setSubmissions] = useState<TaskSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSubmission, setSelectedSubmission] = useState<TaskSubmission | null>(null)
@@ -323,13 +331,5 @@ export default function AdminSubmissionsContent() {
         </div>
       )}
     </div>
-  )
-}
-
-export function AdminSubmissionsPage() {
-  return (
-    <AuthProtected requireAdmin={true}>
-      <AdminSubmissionsContent />
-    </AuthProtected>
   )
 }
