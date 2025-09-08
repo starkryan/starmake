@@ -55,9 +55,6 @@ export default function UserDashboard() {
 function UserDashboardContent() {
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  const [isRedeemModalOpen, setIsRedeemModalOpen] = useState(false);
-  const [redeemForm, setRedeemForm] = useState({ salaryCode: '', upiId: '', userName: '', userPhone: '' });
-  const [submitting, setSubmitting] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [tasksLoading, setTasksLoading] = useState(true);
 
@@ -116,28 +113,6 @@ function UserDashboardContent() {
     return typeMap[taskType] || taskType;
   };
 
-  const handleRedeemSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      const response = await fetch('/api/user/redeem-code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(redeemForm) });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || 'Failed to redeem salary code');
-      toast.success('Redemption request submitted successfully! 🎉');
-      const confetti = await import('canvas-confetti');
-      confetti.default({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-      setIsRedeemModalOpen(false);
-      setRedeemForm({ salaryCode: '', upiId: '', userName: '', userPhone: '' });
-      await refetchRedeem();
-    } catch (error) {
-      console.error('Error redeeming code:', error);
-      toast.error(error instanceof Error ? error.message : 'Error redeeming code');
-    } finally { setSubmitting(false); }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target; setRedeemForm(prev => ({ ...prev, [name]: value }));
-  };
 
   if (loading) return (<div className='min-h-screen flex items-center justify-center'><Spinner className='h-8 w-8' /></div>);
 
@@ -155,44 +130,12 @@ function UserDashboardContent() {
             <Button asChild variant='outline' className='w-full sm:w-auto'>
               <Link href='/tasks'>View All Tasks <ArrowRight className='w-4 h-4 ml-2' /></Link>
             </Button>
-            <Dialog open={isRedeemModalOpen} onOpenChange={setIsRedeemModalOpen}>
-              <DialogTrigger asChild>
-                <Button className='w-full sm:w-auto'>
-                  <FaPlus className='w-4 h-4 mr-2' />
-                  Redeem Code
-                </Button>
-              </DialogTrigger>
-              <DialogContent className='sm:max-w-[500px]'>
-                <DialogHeader>
-                  <DialogTitle>Redeem Salary Code</DialogTitle>
-                  <DialogDescription>Enter your salary code details to redeem it.</DialogDescription>
-                </DialogHeader>
-                <form onSubmit={handleRedeemSubmit} className='space-y-4'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='salaryCode'>Salary Code</Label>
-                    <Input id='salaryCode' name='salaryCode' value={redeemForm.salaryCode} onChange={handleInputChange} placeholder='Enter salary code' required />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label htmlFor='upiId'>UPI ID</Label>
-                    <Input id='upiId' name='upiId' value={redeemForm.upiId} onChange={handleInputChange} placeholder='Enter your UPI ID' required />
-                  </div>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
-                    <div className='space-y-2'>
-                      <Label htmlFor='userName'>Full Name</Label>
-                      <Input id='userName' name='userName' value={redeemForm.userName} onChange={handleInputChange} placeholder='Enter your full name' required />
-                    </div>
-                    <div className='space-y-2'>
-                      <Label htmlFor='userPhone'>Phone Number</Label>
-                      <Input id='userPhone' name='userPhone' value={redeemForm.userPhone} onChange={handleInputChange} placeholder='Enter your phone number' required />
-                    </div>
-                  </div>
-                  <div className='flex justify-end gap-3 pt-2'>
-                    <Button type='button' variant='outline' onClick={() => setIsRedeemModalOpen(false)}>Cancel</Button>
-                    <Button type='submit' disabled={submitting}>{submitting ? 'Submitting...' : 'Redeem Code'}</Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button asChild className='w-full sm:w-auto'>
+              <Link href="/redeem">
+                <FaPlus className='w-4 h-4 mr-2' />
+                Redeem Code
+              </Link>
+            </Button>
           </div>
         </div>
 
@@ -260,11 +203,9 @@ function UserDashboardContent() {
         <Card>
           <CardHeader className='flex flex-row items-center justify-between'>
             <div><CardTitle>Redemption Requests</CardTitle><CardDescription>Track the status of your salary code redemption requests</CardDescription></div>
-            <Dialog open={isRedeemModalOpen} onOpenChange={setIsRedeemModalOpen}>
-              <DialogTrigger asChild>
-                <Button><Plus className='w-4 h-4 mr-2' /> Redeem New Code</Button>
-              </DialogTrigger>
-            </Dialog>
+            <Button asChild>
+              <Link href="/redeem"><Plus className='w-4 h-4 mr-2' /> Redeem New Code</Link>
+            </Button>
           </CardHeader>
           <CardContent>
             {/* Desktop table */}
@@ -384,33 +325,7 @@ function UserDashboardContent() {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-          <Card>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'><FaCheckCircle className='h-5 w-5' /> Redeem New Code</CardTitle>
-              <CardDescription>Have a new salary code to redeem?</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Dialog open={isRedeemModalOpen} onOpenChange={setIsRedeemModalOpen}>
-                <DialogTrigger asChild>
-                  <Button className='w-full' size='lg'><FaCheckCircle className='w-4 h-4 mr-2' /> Redeem Now</Button>
-                </DialogTrigger>
-              </Dialog>
-            </CardContent>
-          </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className='flex items-center gap-2'><FaQuestionCircle className='h-5 w-5' /> Need Help?</CardTitle>
-              <CardDescription>Contact support if you have issues</CardDescription>
-            </CardHeader>
-            <CardContent className='space-y-2'>
-              <div className='flex items-center gap-2 text-sm'><FaEnvelope className='h-4 w-4' /><span>support@salarywork.com</span></div>
-              <div className='flex items-center gap-2 text-sm'><FaPhone className='h-4 w-4' /><span>+91-XXXXX-XXXXX</span></div>
-            </CardContent>
-          </Card>
-        </div>
 
         <div className='h-16 md:hidden -mt-8' />
       </div>
