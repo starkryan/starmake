@@ -125,68 +125,60 @@ function UserDashboardContent() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto p-6 space-y-8">
-        {/* Header Section */}
-        <div className="flex flex-col gap-2">
-          <h1 className="text-4xl font-bold tracking-tight">Dashboard</h1>
-          {userEmail && (
-            <p className="text-muted-foreground">
-              Welcome back, <span className="font-medium text-foreground">{userEmail}</span>
-            </p>
-          )}
-        </div>
+      <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-8">
+      
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-blue-600 dark:text-blue-400">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-6">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 p-4 md:p-6">
+            <CardHeader className="pb-2 p-0">
+              <CardTitle className="text-xs md:text-sm font-medium text-blue-600 dark:text-blue-400">
                 Total Redemptions
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{redeemRequests.length}</div>
-              <p className="text-xs text-muted-foreground">Salary code redemptions</p>
+            <CardContent className="p-0 pt-2">
+              <div className="text-xl md:text-3xl font-bold">{redeemRequests.length}</div>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Salary code redemptions</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-green-600 dark:text-green-400">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 p-4 md:p-6">
+            <CardHeader className="pb-2 p-0">
+              <CardTitle className="text-xs md:text-sm font-medium text-green-600 dark:text-green-400">
                 Approved Redemptions
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
+            <CardContent className="p-0 pt-2">
+              <div className="text-xl md:text-3xl font-bold">
                 {redeemRequests.filter(r => r.status === 'approved').length}
               </div>
-              <p className="text-xs text-muted-foreground">Successful redemptions</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Successful redemptions</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-purple-600 dark:text-purple-400">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 p-4 md:p-6">
+            <CardHeader className="pb-2 p-0">
+              <CardTitle className="text-xs md:text-sm font-medium text-purple-600 dark:text-purple-400">
                 Task Submissions
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{taskSubmissions.length}</div>
-              <p className="text-xs text-muted-foreground">Completed tasks</p>
+            <CardContent className="p-0 pt-2">
+              <div className="text-xl md:text-3xl font-bold">{taskSubmissions.length}</div>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Completed tasks</p>
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-amber-600 dark:text-amber-400">
+          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900 p-4 md:p-6">
+            <CardHeader className="pb-2 p-0">
+              <CardTitle className="text-xs md:text-sm font-medium text-amber-600 dark:text-amber-400">
                 Pending Tasks
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
+            <CardContent className="p-0 pt-2">
+              <div className="text-xl md:text-3xl font-bold">
                 {taskSubmissions.filter(t => t.status === 'pending').length}
               </div>
-              <p className="text-xs text-muted-foreground">Awaiting approval</p>
+              <p className="text-[10px] md:text-xs text-muted-foreground">Awaiting approval</p>
             </CardContent>
           </Card>
         </div>
@@ -461,6 +453,8 @@ function UserDashboardContent() {
             </CardContent>
           </Card>
         </div>
+        {/* Spacer for bottom navigation on mobile */}
+        <div className="h-16 md:hidden -mt-8"></div>
       </div>
     </div>
   );

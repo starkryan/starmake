@@ -241,7 +241,7 @@ function Page() {
             <Button size="lg" variant="secondary" className="px-8">
               Sign Up Free
             </Button>
-            <Button size="lg" variant="outline" className="px-8 border-white text-white">
+            <Button size="lg" variant="outline" className="px-8 text-black">
               See All Opportunities
             </Button>
           </div>

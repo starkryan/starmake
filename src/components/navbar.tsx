@@ -34,7 +34,7 @@ const navigationLinks = [
   { href: "/profile", label: "Profile" },
 ]
 
-export default function Component() {
+export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const router = useRouter()
@@ -69,7 +69,7 @@ export default function Component() {
   }, [])
 
   return (
-    <header className="border-b px-4 md:px-6">
+    <header className="fixed md:sticky top-0 left-0 right-0 z-50 w-full border-b bg-background px-4 md:px-6">
       <div className="flex h-16 items-center justify-between gap-4">
         {/* Left side */}
         <div className="flex items-center gap-2">
@@ -152,15 +152,15 @@ export default function Component() {
           {userEmail ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-primary text-primary-foreground">
+                <Button variant="ghost" className="relative h-10 w-10 p-0 rounded-full overflow-hidden aspect-square md:h-8 md:w-8">
+                  <Avatar className="h-full w-full rounded-full">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-sm md:text-xs flex items-center justify-center">
                       {userEmail.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-full max-w-[280px] md:w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{userEmail}</p>
