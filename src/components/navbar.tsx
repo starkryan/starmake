@@ -25,6 +25,7 @@ import { authClient } from "@/lib/auth-client"
 import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { toast } from "sonner"
+import UserBalanceDisplay from "@/components/ui/user-balance-display"
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
@@ -37,6 +38,7 @@ const navigationLinks = [
 export default function Navbar() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -57,6 +59,7 @@ export default function Navbar() {
         const session = await authClient.getSession()
         if (session?.data?.user) {
           setUserEmail(session.data.user.email)
+          setUserId(session.data.user.id)
           // Use type assertion to access role field
           const userWithRole = session.data.user as any
           setUserRole(userWithRole.role || 'user')
@@ -65,6 +68,7 @@ export default function Navbar() {
         console.error('Error fetching session:', error)
       }
     }
+
     fetchSession()
   }, [])
 
@@ -150,52 +154,63 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           {userEmail ? (
+            <>
+              {/* Balance Display */}
+              {userId && (
+                <UserBalanceDisplay 
+                  userId={userId}
+                  showAddButton={true}
+                  onAddMoney={() => router.push('/redeem')}
+                />
+              )}
+              
               <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-12 w-12 p-0 rounded-full overflow-hidden aspect-square md:h-8 md:w-8">
-                  <Avatar className="h-full w-full rounded-full">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-lg md:text-xs flex items-center justify-center">
-                      {userEmail.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full max-w-[300px] md:w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium">{userEmail}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Welcome back!
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
-                  <a href="/">Home</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
-                  <a href="/tasks">Tasks</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
-                  <a href="/redeem">Redeem</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
-                  <a href="/profile">Profile</a>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
-                  <a href="/dashboard">Dashboard</a>
-                </DropdownMenuItem>
-                {userRole === 'admin' && (
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-12 w-12 p-0 rounded-full overflow-hidden aspect-square md:h-8 md:w-8">
+                    <Avatar className="h-full w-full rounded-full">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-lg md:text-xs flex items-center justify-center">
+                        {userEmail.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full max-w-[300px] md:w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{userEmail}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Welcome back!
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
-                    <a href="/admin">Admin</a>
+                    <a href="/">Home</a>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} className="py-3 text-base md:py-2 md:text-sm">
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
+                    <a href="/tasks">Tasks</a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
+                    <a href="/redeem">Redeem</a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
+                    <a href="/profile">Profile</a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
+                    <a href="/dashboard">Dashboard</a>
+                  </DropdownMenuItem>
+                  {userRole === 'admin' && (
+                    <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
+                      <a href="/admin">Admin</a>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="py-3 text-base md:py-2 md:text-sm">
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <>
               <Button asChild variant="ghost" size="sm" className="text-sm">

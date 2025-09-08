@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TestimonialsSection } from '@/components/blocks/testimonials-with-marquee'
+import { FaThumbsUp, FaStar, FaPlay, FaClipboardList, FaMobile, FaUsers } from 'react-icons/fa6'
 
 function Page() {
   const earningOpportunities = [
@@ -11,42 +12,42 @@ function Page() {
       title: "Like Social Media Posts",
       description: "Get paid for liking and engaging with posts on popular social platforms.",
       earnings: "₹50-200 per post",
-      image: "/window.svg",
+      icon: FaThumbsUp,
       category: "Social Media"
     },
     {
       title: "Rate Hotels & Restaurants",
       description: "Share your honest reviews and ratings for hotels and earn money.",
       earnings: "₹100-500 per review",
-      image: "/globe.svg",
+      icon: FaStar,
       category: "Reviews"
     },
     {
       title: "Watch Ads & Videos",
       description: "Earn money by watching promotional content and advertisements.",
       earnings: "₹20-100 per video",
-      image: "/file.svg",
+      icon: FaPlay,
       category: "Advertising"
     },
     {
       title: "Complete Surveys",
       description: "Share your opinions through surveys and get rewarded.",
       earnings: "₹150-300 per survey",
-      image: "/vercel.svg",
+      icon: FaClipboardList,
       category: "Surveys"
     },
     {
       title: "Test Apps & Websites",
       description: "Get paid to test new applications and provide feedback.",
       earnings: "₹200-800 per test",
-      image: "/next.svg",
+      icon: FaMobile,
       category: "Testing"
     },
     {
       title: "Refer Friends",
       description: "Earn commission by referring friends to our platform.",
       earnings: "₹500 per referral",
-      image: "/promo.png",
+      icon: FaUsers,
       category: "Referral"
     }
   ];
@@ -105,30 +106,30 @@ function Page() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="container mx-auto py-20 text-center">
-        <div className="space-y-6 max-w-4xl mx-auto">
-          <Badge variant="secondary" className="text-lg px-4 py-1">
+      <section className="container mx-auto py-12 md:py-20 text-center px-4">
+        <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto">
+          <Badge variant="secondary" className="text-sm md:text-lg px-3 md:px-4 py-1">
             Earn Real Money Online
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight">
             Turn Your{' '}
             <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Free Time
             </span>{' '}
             Into Income
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed">
+          <p className="text-base md:text-xl lg:text-2xl text-muted-foreground leading-relaxed">
             Discover thousands of earning opportunities from social media engagement to hotel reviews. 
             Get paid for your time and creativity with instant withdrawals.
           </p>
-          <div className="flex gap-4 justify-center pt-6">
-            <Link href="/login">
-              <Button size="lg" className="px-8">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 md:pt-6">
+            <Link href="/login" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full sm:w-auto px-6 md:px-8">
                 Start Earning Now
               </Button>
             </Link>
-            <Link href="/learn-more">
-              <Button size="lg" variant="outline" className="px-8">
+            <Link href="/learn-more" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 md:px-8">
                 Learn More
               </Button>
             </Link>
@@ -137,39 +138,35 @@ function Page() {
       </section>
 
       {/* Earning Opportunities Section */}
-      <section className="container mx-auto py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">How You Can Earn</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+      <section className="container mx-auto py-12 md:py-16 px-4">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">How You Can Earn</h2>
+          <p className="text-base md:text-xl text-muted-foreground max-w-2xl mx-auto">
             Choose from various earning methods that fit your skills and schedule
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {earningOpportunities.map((opportunity, index) => (
             <Card key={index} className="hover-lift transition-all duration-300">
-              <CardHeader>
-                <div className="flex items-center justify-between mb-4">
-                  <Badge variant="outline">{opportunity.category}</Badge>
-                  <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                    <img 
-                      src={opportunity.image} 
-                      alt={opportunity.title}
-                      className="w-8 h-8 object-contain"
-                    />
+              <CardHeader className="p-4 md:p-6">
+                <div className="flex items-center justify-between mb-3 md:mb-4">
+                  <Badge variant="outline" className="text-xs md:text-sm">{opportunity.category}</Badge>
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-lg flex items-center justify-center">
+                    <opportunity.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl">{opportunity.title}</CardTitle>
-                <CardDescription className="text-lg">
+                <CardTitle className="text-xl md:text-2xl">{opportunity.title}</CardTitle>
+                <CardDescription className="text-sm md:text-lg">
                   {opportunity.description}
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-4 md:p-6">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-green-600">
+                  <span className="font-semibold text-green-600 text-sm md:text-base">
                     {opportunity.earnings}
                   </span>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-xs md:text-sm">
                     Get Started →
                   </Button>
                 </div>
@@ -180,40 +177,40 @@ function Page() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-muted/50 py-20">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">How It Works</h2>
-            <p className="text-xl text-muted-foreground">
+      <section className="bg-muted/50 py-12 md:py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-8 md:mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+            <p className="text-base md:text-xl text-muted-foreground">
               Start earning in just 3 simple steps
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4">
                 1
               </div>
-              <h3 className="text-2xl font-semibold mb-2">Sign Up Free</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl md:text-2xl font-semibold mb-2">Sign Up Free</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
                 Create your account and complete your profile in minutes
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4">
                 2
               </div>
-              <h3 className="text-2xl font-semibold mb-2">Choose Tasks</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl md:text-2xl font-semibold mb-2">Choose Tasks</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
                 Select from available earning opportunities that interest you
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4">
                 3
               </div>
-              <h3 className="text-2xl font-semibold mb-2">Get Paid</h3>
-              <p className="text-muted-foreground">
+              <h3 className="text-xl md:text-2xl font-semibold mb-2">Get Paid</h3>
+              <p className="text-sm md:text-base text-muted-foreground">
                 Complete tasks and receive instant payments to your UPI account
               </p>
             </div>
@@ -229,19 +226,19 @@ function Page() {
       />
 
       {/* CTA Section */}
-      <section className="container mx-auto py-20 text-center">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl p-12 text-white">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+      <section className="container mx-auto py-12 md:py-20 text-center px-4">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl md:rounded-3xl p-6 md:p-12 text-white">
+          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
             Ready to Start Earning?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-base md:text-xl mb-6 md:mb-8 opacity-90">
             Join our community of earners and start making money today
           </p>
-          <div className="flex gap-4 justify-center">
-            <Button size="lg" variant="secondary" className="px-8">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Button size="lg" variant="secondary" className="w-full sm:w-auto px-6 md:px-8">
               Sign Up Free
             </Button>
-            <Button size="lg" variant="outline" className="px-8 text-black">
+            <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 md:px-8 text-black">
               See All Opportunities
             </Button>
           </div>
