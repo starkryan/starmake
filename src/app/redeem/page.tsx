@@ -127,6 +127,8 @@ function RedeemContent() {
           </form>
         </CardContent>
       </Card>
+      {/* Spacer for bottom navigation on mobile */}
+      <div className="h-16 md:hidden -mt-8"></div>
     </div>
   )
 }

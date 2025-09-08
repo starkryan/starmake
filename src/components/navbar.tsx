@@ -150,17 +150,17 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-2">
           {userEmail ? (
-            <DropdownMenu>
+              <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 p-0 rounded-full overflow-hidden aspect-square md:h-8 md:w-8">
+                <Button variant="ghost" className="relative h-12 w-12 p-0 rounded-full overflow-hidden aspect-square md:h-8 md:w-8">
                   <Avatar className="h-full w-full rounded-full">
-                    <AvatarFallback className="bg-primary text-primary-foreground text-sm md:text-xs flex items-center justify-center">
+                    <AvatarFallback className="bg-primary text-primary-foreground text-lg md:text-xs flex items-center justify-center">
                       {userEmail.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full max-w-[280px] md:w-56" align="end" forceMount>
+              <DropdownMenuContent className="w-full max-w-[300px] md:w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium">{userEmail}</p>
@@ -170,28 +170,28 @@ export default function Navbar() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
                   <a href="/">Home</a>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
                   <a href="/tasks">Tasks</a>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
                   <a href="/redeem">Redeem</a>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
                   <a href="/profile">Profile</a>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
                   <a href="/dashboard">Dashboard</a>
                 </DropdownMenuItem>
                 {userRole === 'admin' && (
-                  <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild className="py-3 text-base md:py-2 md:text-sm">
                     <a href="/admin">Admin</a>
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
+                <DropdownMenuItem onClick={handleSignOut} className="py-3 text-base md:py-2 md:text-sm">
                   Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>

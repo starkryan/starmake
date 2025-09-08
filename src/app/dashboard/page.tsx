@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +16,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X } from "lucide-react";
+import { Plus, X, ArrowRight } from "lucide-react";
+import { FaClipboardList, FaCheckCircle, FaQuestionCircle, FaEnvelope, FaPhone, FaPlus } from "react-icons/fa";
 import { authClient } from '@/lib/auth-client';
 import AuthProtected from '@/components/auth/auth-protected';
 import { toast } from 'sonner';
@@ -23,6 +25,19 @@ import { Spinner } from '@/components/ui/spinner';
 import { useRedeemRequests } from '@/hooks/use-redeem-requests';
 import { useTaskSubmissions } from '@/hooks/tasks/use-task-submissions';
 import { RedeemRequest, TaskSubmission } from '@/types';
+import { supabase } from '@/lib/supabase';
+
+interface Task {
+  id: string
+  title: string
+  description: string
+  task_type: string
+  price: number
+  is_free: boolean
+  mb_limit: number | null
+  requirements: any
+  status: string
+}
 
 function UserDashboardContent() {
   const [userEmail, setUserEmail] = useState('');
@@ -35,11 +50,13 @@ function UserDashboardContent() {
     userPhone: ''
   });
   const [submitting, setSubmitting] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasksLoading, setTasksLoading] = useState(true);
 
   const { redeemRequests, loading: redeemLoading, error: redeemError, refetch: refetchRedeem } = useRedeemRequests(userId);
   const { taskSubmissions, loading: taskLoading, error: taskError, refetch: refetchTasks } = useTaskSubmissions(userId);
 
-  const loading = redeemLoading || taskLoading;
+  const loading = redeemLoading || taskLoading || tasksLoading;
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -56,6 +73,29 @@ function UserDashboardContent() {
     fetchSession();
   }, []);
 
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("tasks")
+          .select("*")
+          .eq("status", "active")
+          .order("created_at", { ascending: false })
+          .limit(3); // Show only 3 tasks in dashboard
+
+        if (error) throw error;
+        setTasks(data || []);
+      } catch (error) {
+        console.error("Error fetching tasks:", error);
+        toast.error("Failed to fetch tasks");
+      } finally {
+        setTasksLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
@@ -67,6 +107,19 @@ function UserDashboardContent() {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const getTaskTypeBadge = (taskType: string) => {
+    const typeMap: Record<string, string> = {
+      instagram: "Instagram",
+      youtube: "YouTube",
+      video: "Video",
+      content: "Content",
+      survey: "Survey",
+      app_test: "App Test",
+      other: "Other"
+    }
+    return typeMap[taskType] || taskType
   };
 
   const handleRedeemSubmit = async (e: React.FormEvent) => {
@@ -183,6 +236,59 @@ function UserDashboardContent() {
           </Card>
         </div>
 
+        {/* Available Tasks */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Available Tasks</CardTitle>
+              <CardDescription>Complete tasks to earn salary codes</CardDescription>
+            </div>
+            <Button asChild variant="outline">
+              <Link href="/tasks">
+                View All Tasks
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {tasks.length === 0 ? (
+              <div className="text-center py-12 space-y-4">
+                <div className="text-muted-foreground">
+                  <FaClipboardList className="mx-auto h-12 w-12" />
+                </div>
+                <h3 className="text-lg font-medium">No tasks available</h3>
+                <p className="text-sm text-muted-foreground">
+                  Check back later for new tasks to complete.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {tasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="flex-1">
+                      <h4 className="font-medium">{task.title}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="outline">{getTaskTypeBadge(task.task_type)}</Badge>
+                        {task.is_free ? (
+                          <Badge variant="secondary">Free</Badge>
+                        ) : (
+                          <Badge variant="default">₹{task.price}</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                        {task.description}
+                      </p>
+                    </div>
+                    <Button asChild size="sm" className="ml-4">
+                      <Link href={`/tasks/${task.id}`}>Start</Link>
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         {/* Redemption Requests */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -278,7 +384,7 @@ function UserDashboardContent() {
                 <Dialog open={isRedeemModalOpen} onOpenChange={setIsRedeemModalOpen}>
                   <DialogTrigger asChild>
                     <Button className="mt-4">
-                      <Plus className="w-4 h-4 mr-2" />
+                      <FaPlus className="w-4 h-4 mr-2" />
                       Redeem Now
                     </Button>
                   </DialogTrigger>
@@ -345,9 +451,7 @@ function UserDashboardContent() {
             {taskSubmissions.length === 0 ? (
               <div className="text-center py-12 space-y-4">
                 <div className="text-muted-foreground">
-                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
+                  <FaCheckCircle className="mx-auto h-12 w-12" />
                 </div>
                 <h3 className="text-lg font-medium">No task submissions</h3>
                 <p className="text-sm text-muted-foreground">
@@ -410,7 +514,7 @@ function UserDashboardContent() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
+                <FaCheckCircle className="h-5 w-5" />
                 Redeem New Code
               </CardTitle>
               <CardDescription>Have a new salary code to redeem?</CardDescription>
@@ -419,7 +523,7 @@ function UserDashboardContent() {
               <Dialog open={isRedeemModalOpen} onOpenChange={setIsRedeemModalOpen}>
                 <DialogTrigger asChild>
                   <Button className="w-full" size="lg">
-                    <Plus className="w-4 h-4 mr-2" />
+                    <FaCheckCircle className="w-4 h-4 mr-2" />
                     Redeem Now
                   </Button>
                 </DialogTrigger>
@@ -430,24 +534,18 @@ function UserDashboardContent() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <FaQuestionCircle className="h-5 w-5" />
                 Need Help?
               </CardTitle>
               <CardDescription>Contact support if you have issues</CardDescription>
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center gap-2 text-sm">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
+                <FaEnvelope className="h-4 w-4" />
                 <span>support@salarywork.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm">
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
+                <FaPhone className="h-4 w-4" />
                 <span>+91-XXXXX-XXXXX</span>
               </div>
             </CardContent>
