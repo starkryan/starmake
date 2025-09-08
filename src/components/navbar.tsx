@@ -22,10 +22,10 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { authClient } from "@/lib/auth-client"
-import { useEffect, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { toast } from "sonner"
 import UserBalanceDisplay from "@/components/ui/user-balance-display"
+import { useAuth } from "@/contexts/AuthContext"
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
@@ -36,15 +36,13 @@ const navigationLinks = [
 ]
 
 export default function Navbar() {
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [userRole, setUserRole] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
+  const { user, signOut } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
   const handleSignOut = async () => {
     try {
-      await authClient.signOut()
+      await signOut()
       toast.success('Signed out successfully!')
       router.push('/')
     } catch (error) {
@@ -53,24 +51,9 @@ export default function Navbar() {
     }
   }
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      try {
-        const session = await authClient.getSession()
-        if (session?.data?.user) {
-          setUserEmail(session.data.user.email)
-          setUserId(session.data.user.id)
-          // Use type assertion to access role field
-          const userWithRole = session.data.user as any
-          setUserRole(userWithRole.role || 'user')
-        }
-      } catch (error) {
-        console.error('Error fetching session:', error)
-      }
-    }
-
-    fetchSession()
-  }, [])
+  const userEmail = user?.email || null
+  const userId = user?.id || null
+  const userRole = (user as any)?.role || 'user'
 
   return (
     <header className="fixed md:sticky top-0 left-0 right-0 z-50 w-full border-b bg-background px-4 md:px-6">

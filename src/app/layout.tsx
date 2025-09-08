@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar";
 import BottomNavigation from "@/components/bottom-nav";
 import { Footerdemo } from "@/components/ui/footer-section";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +32,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        <main className="pt-16 md:pt-0">
-          {children}
-        </main>
-        <BottomNavigation />
-        <Footerdemo />
-        <Toaster />
+        <AuthProvider>
+          <Navbar />
+          <main className="pt-16 md:pt-0">
+            {children}
+          </main>
+          <BottomNavigation />
+          <Footerdemo />
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

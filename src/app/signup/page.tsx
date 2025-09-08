@@ -9,36 +9,30 @@ import { Label } from '@/components/ui/label';
 import { authClient } from '@/lib/auth-client';
 import { toast } from 'sonner';
 import { FcGoogle } from 'react-icons/fc';
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaSignature } from 'react-icons/fa6';
 import { Spinner } from '@/components/ui/spinner';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function SignupPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [checkingSession, setCheckingSession] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
+  // Use useEffect to handle redirects after component render
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const session = await authClient.getSession();
-        if (session?.data?.user) {
-          router.push('/dashboard');
-        }
-      } catch (error) {
-        console.error('Error checking session:', error);
-      } finally {
-        setCheckingSession(false);
-      }
-    };
+    if (user && !authLoading) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
 
-    checkSession();
-  }, [router]);
-
-  if (checkingSession) {
+  // Show loading spinner while auth state is being checked or if user exists (redirecting)
+  if (authLoading || user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Spinner className="h-8 w-8" />
@@ -48,7 +42,6 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -56,7 +49,7 @@ export default function SignupPage() {
       return;
     }
 
-    setLoading(true);
+    setFormLoading(true);
 
     try {
       const { data, error } = await authClient.signUp.email({
@@ -79,7 +72,7 @@ export default function SignupPage() {
       console.error('Signup error:', error);
       toast.error('An error occurred during signup');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -106,67 +99,151 @@ export default function SignupPage() {
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
-          <CardDescription className="text-center">
-            Create a new account to get started
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:py-12">
+      <Card className="w-full max-w-md border-0 shadow-lg">
+        <CardHeader className="space-y-1 text-center pb-6">
+          <div className="mx-auto mb-4 bg-primary p-3 rounded-full w-16 h-16 flex items-center justify-center">
+            <FaUser className="h-8 w-8 text-primary-foreground" />
+          </div>
+          <CardTitle className="text-2xl md:text-3xl font-bold">
+            Create Account
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
+            Join us and start earning today
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Enter your full name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <Label htmlFor="name" className="text-sm font-medium">
+                Full Name
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaSignature className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  disabled={formLoading}
+                  className="pl-10 pr-4 py-3"
+                />
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email Address
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaUser className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={formLoading}
+                  className="pl-10 pr-4 py-3"
+                />
+              </div>
             </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={formLoading}
+                  className="pl-10 pr-12 py-3"
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={formLoading}
+                >
+                  {showPassword ? (
+                    <FaEyeSlash className="h-4 w-4" />
+                  ) : (
+                    <FaEye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                disabled={loading}
-              />
+              <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                Confirm Password
+              </Label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaLock className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Input
+                  id="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  disabled={formLoading}
+                  className="pl-10 pr-12 py-3"
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                  disabled={formLoading}
+                >
+                  {showConfirmPassword ? (
+                    <FaEyeSlash className="h-4 w-4" />
+                  ) : (
+                    <FaEye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating Account...' : 'Sign Up'}
+
+            <Button 
+              type="submit" 
+              className="w-full py-3 text-base font-medium" 
+              disabled={formLoading}
+            >
+              {formLoading ? (
+                <div className="flex items-center justify-center">
+                  <Spinner className="h-4 w-4 mr-2" />
+                  Creating Account...
+                </div>
+              ) : (
+                'Sign Up'
+              )}
             </Button>
 
             <div className="relative">
@@ -183,22 +260,29 @@ export default function SignupPage() {
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full py-3"
               onClick={handleGoogleSignIn}
-              disabled={loading}
+              disabled={formLoading}
             >
-              <FcGoogle className="mr-2 h-4 w-4" />
+              <FcGoogle className="mr-2 h-5 w-5" />
               Continue with Google
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
-            <a href="/login" className="text-blue-600 hover:underline">
-              Sign in
-            </a>
+          
+          <div className="text-center text-sm pt-4 border-t">
+            <p className="text-muted-foreground">
+              Already have an account?{' '}
+              <a 
+                href="/login" 
+                className="font-medium text-primary hover:underline transition-colors"
+              >
+                Sign in
+              </a>
+            </p>
           </div>
         </CardContent>
       </Card>
+      
       {/* Spacer for bottom navigation on mobile */}
       <div className="h-16 md:hidden -mt-8"></div>
     </div>
