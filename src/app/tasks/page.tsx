@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import AuthProtected from "@/components/auth/auth-protected"
 import { Spinner } from "@/components/ui/spinner"
+import { FaInstagram, FaYoutube, FaVideo, FaFileAlt, FaPoll, FaMobile, FaQuestion, FaRupeeSign, FaCheckCircle, FaClock } from "react-icons/fa"
 
 interface Task {
   id: string
@@ -48,17 +49,17 @@ function TasksContent() {
     }
   }
 
-  const getTaskTypeBadge = (taskType: string) => {
-    const typeMap: Record<string, string> = {
-      instagram: "Instagram",
-      youtube: "YouTube",
-      video: "Video",
-      content: "Content",
-      survey: "Survey",
-      app_test: "App Test",
-      other: "Other"
+  const getTaskTypeConfig = (taskType: string) => {
+    const configMap: Record<string, { label: string; icon: React.ReactNode }> = {
+      instagram: { label: "Instagram", icon: <FaInstagram className="w-4 h-4" /> },
+      youtube: { label: "YouTube", icon: <FaYoutube className="w-4 h-4" /> },
+      video: { label: "Video", icon: <FaVideo className="w-4 h-4" /> },
+      content: { label: "Content", icon: <FaFileAlt className="w-4 h-4" /> },
+      survey: { label: "Survey", icon: <FaPoll className="w-4 h-4" /> },
+      app_test: { label: "App Test", icon: <FaMobile className="w-4 h-4" /> },
+      other: { label: "Other", icon: <FaQuestion className="w-4 h-4" /> }
     }
-    return typeMap[taskType] || taskType
+    return configMap[taskType] || { label: taskType, icon: <FaQuestion className="w-4 h-4" /> }
   }
 
   if (loading) {
@@ -81,11 +82,20 @@ function TasksContent() {
             <CardHeader>
               <CardTitle className="text-lg">{task.title}</CardTitle>
               <div className="flex items-center gap-2">
-                <Badge variant="outline">{getTaskTypeBadge(task.task_type)}</Badge>
+                <Badge variant="outline" className="flex items-center gap-1">
+                  {getTaskTypeConfig(task.task_type).icon}
+                  {getTaskTypeConfig(task.task_type).label}
+                </Badge>
                 {task.is_free ? (
-                  <Badge variant="secondary">Free</Badge>
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <FaCheckCircle className="w-3 h-3" />
+                    Free
+                  </Badge>
                 ) : (
-                  <Badge variant="default">₹{task.price}</Badge>
+                  <Badge variant="default" className="flex items-center gap-1">
+                    <FaRupeeSign className="w-3 h-3" />
+                    {task.price}
+                  </Badge>
                 )}
               </div>
             </CardHeader>

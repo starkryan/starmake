@@ -12,7 +12,7 @@ import { toast } from "sonner"
 import AuthProtected from "@/components/auth/auth-protected"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/lib/auth-client"
-import { Upload, X } from "lucide-react"
+import { Upload, X, Link as LinkIcon, Image as ImageIcon, FileText, Info } from "lucide-react"
 import { FaClipboardList } from "react-icons/fa6"
 
 interface Task {
@@ -201,26 +201,38 @@ function TaskCompletionContent() {
         {/* Task Details */}
         <Card>
           <CardHeader>
-            <CardTitle>Task Details</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Info className="h-5 w-5" />
+              Task Details
+            </CardTitle>
             <CardDescription>Complete this task to earn rewards</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold">Description:</h3>
-              <p className="text-muted-foreground">{task.description}</p>
+              <h3 className="font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Description:
+              </h3>
+              <p className="text-muted-foreground mt-1">{task.description}</p>
             </div>
 
             {task.mb_limit && (
               <div>
-                <h3 className="font-semibold">MB Limit:</h3>
-                <p className="text-muted-foreground">{task.mb_limit}MB</p>
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Info className="h-4 w-4" />
+                  MB Limit:
+                </h3>
+                <p className="text-muted-foreground mt-1">{task.mb_limit}MB</p>
               </div>
             )}
 
             {task.requirements && Object.keys(task.requirements).length > 0 && (
               <div>
-                <h3 className="font-semibold">Requirements:</h3>
-                <pre className="bg-muted p-3 rounded text-sm mt-2">
+                <h3 className="font-semibold flex items-center gap-2">
+                  <Info className="h-4 w-4" />
+                  Requirements:
+                </h3>
+                <pre className="bg-muted p-3 rounded text-sm mt-2" aria-label="Task requirements in JSON format">
                   {JSON.stringify(task.requirements, null, 2)}
                 </pre>
               </div>
@@ -236,13 +248,18 @@ function TaskCompletionContent() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Proof of Completion</label>
+              <label htmlFor="proof-input" className="text-sm font-medium flex items-center gap-2">
+                <LinkIcon className="h-4 w-4" />
+                Proof of Completion
+              </label>
               <Input
+                id="proof-input"
                 placeholder={getSubmissionPlaceholder(task.task_type)}
                 value={submissionData.proof}
                 onChange={(e) => setSubmissionData({...submissionData, proof: e.target.value})}
+                aria-describedby="proof-help"
               />
-              <p className="text-xs text-muted-foreground">
+              <p id="proof-help" className="text-xs text-muted-foreground">
                 {task.task_type === "instagram" && "Paste the URL of your Instagram post or upload screenshot"}
                 {task.task_type === "youtube" && "Paste the URL of your YouTube video"}
                 {task.task_type === "video" && "Share a link to your video or describe it"}
@@ -255,11 +272,18 @@ function TaskCompletionContent() {
 
             {/* Image Upload Section */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Upload Screenshot (Optional)</label>
+              <label htmlFor="image-upload" className="text-sm font-medium flex items-center gap-2">
+                <ImageIcon className="h-4 w-4" />
+                Upload Screenshot (Optional)
+              </label>
               {!submissionData.imagePreview ? (
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                <div 
+                  className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center"
+                  role="region"
+                  aria-labelledby="upload-instructions"
+                >
                   <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <p id="upload-instructions" className="text-sm text-muted-foreground mb-2">
                     Drag & drop or click to upload
                   </p>
                   <Input
@@ -268,11 +292,13 @@ function TaskCompletionContent() {
                     onChange={handleImageUpload}
                     className="hidden"
                     id="image-upload"
+                    aria-describedby="image-help"
                   />
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => document.getElementById('image-upload')?.click()}
+                    aria-label="Select image file"
                   >
                     Select Image
                   </Button>
@@ -281,7 +307,7 @@ function TaskCompletionContent() {
                 <div className="relative">
                   <img
                     src={submissionData.imagePreview}
-                    alt="Upload preview"
+                    alt="Preview of uploaded screenshot"
                     className="w-full h-48 object-cover rounded-lg"
                   />
                   <Button
@@ -289,29 +315,38 @@ function TaskCompletionContent() {
                     size="icon"
                     className="absolute top-2 right-2 h-8 w-8"
                     onClick={removeImage}
+                    aria-label="Remove uploaded image"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               )}
-              <p className="text-xs text-muted-foreground">
+              <p id="image-help" className="text-xs text-muted-foreground">
                 Upload a screenshot of your completed task (max 5MB)
               </p>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Additional Notes (Optional)</label>
+              <label htmlFor="additional-notes" className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Additional Notes (Optional)
+              </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 pt-3 flex items-center pointer-events-none">
+                <div className="absolute inset-y-0 left-0 pl-3 pt-3 flex items-center pointer-events-none" aria-hidden="true">
                   <FaClipboardList className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <Textarea
+                  id="additional-notes"
                   placeholder="Any additional information or comments..."
                   value={submissionData.additional_notes}
                   onChange={(e) => setSubmissionData({...submissionData, additional_notes: e.target.value})}
                   className="pl-10"
+                  aria-describedby="notes-help"
                 />
               </div>
+              <p id="notes-help" className="text-xs text-muted-foreground">
+                Share any additional details about your task completion
+              </p>
             </div>
 
             <Button 

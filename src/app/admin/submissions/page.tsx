@@ -42,7 +42,16 @@ interface TaskSubmission {
   }
 }
 
-function AdminSubmissionsContent() {
+function formatDate(input?: string) {
+  if (!input) return "-"
+  try {
+    return new Date(input).toLocaleDateString()
+  } catch {
+    return input as string
+  }
+}
+
+export default function AdminSubmissionsContent() {
   const [submissions, setSubmissions] = useState<TaskSubmission[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedSubmission, setSelectedSubmission] = useState<TaskSubmission | null>(null)
@@ -63,7 +72,7 @@ function AdminSubmissionsContent() {
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setSubmissions(data || [])
+      setSubmissions((data as TaskSubmission[]) || [])
     } catch (error) {
       console.error("Error fetching submissions:", error)
       toast.error("Failed to fetch submissions")
@@ -115,7 +124,7 @@ function AdminSubmissionsContent() {
       case "rejected":
         return <Badge variant="destructive">Rejected</Badge>
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline" className="capitalize">{status}</Badge>
     }
   }
 
@@ -128,7 +137,7 @@ function AdminSubmissionsContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 pb-24 space-y-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         <h1 className="text-2xl md:text-3xl font-bold">Task Submissions</h1>
         <Button onClick={fetchSubmissions} variant="outline" className="w-full sm:w-auto">
@@ -142,122 +151,182 @@ function AdminSubmissionsContent() {
           <CardDescription>Review and manage task submissions from users</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>User</TableHead>
-                <TableHead>Task</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Proof</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Submitted</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {submissions.map((submission) => (
-                <TableRow key={submission.id}>
-                  <TableCell className="font-medium">{submission.user?.email}</TableCell>
-                  <TableCell>{submission.tasks?.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {submission.tasks?.task_type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedSubmission(submission)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Proof
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-[600px]">
-                        <DialogHeader>
-                          <DialogTitle>Submission Details</DialogTitle>
-                          <DialogDescription>
-                            Review the proof submitted by the user
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <h4 className="font-semibold">Proof:</h4>
-                            <p className="text-muted-foreground">
-                              {submission.submission_proof.proof}
-                            </p>
-                          </div>
-                          {submission.submission_proof.additional_notes && (
-                            <div>
-                              <h4 className="font-semibold">Additional Notes:</h4>
-                              <p className="text-muted-foreground">
-                                {submission.submission_proof.additional_notes}
-                              </p>
-                            </div>
-                          )}
-                          {submission.submission_proof.image_url && (
-                            <div>
-                              <h4 className="font-semibold">Screenshot:</h4>
-                              <img
-                                src={submission.submission_proof.image_url}
-                                alt="Submission proof"
-                                className="w-full h-48 object-contain rounded-lg border"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                  </TableCell>
-                  <TableCell>{getStatusBadge(submission.status)}</TableCell>
-                  <TableCell>
-                    {new Date(submission.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    {submission.status === "pending" && (
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleApprove(submission.id)}
-                          className="bg-green-600 hover:bg-green-700"
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleReject(submission.id)}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Reject
-                        </Button>
-                      </div>
-                    )}
-                  </TableCell>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>User</TableHead>
+                  <TableHead>Task</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Proof</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Submitted</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {submissions.map((submission) => (
+                  <TableRow key={submission.id}>
+                    <TableCell className="font-medium">{submission.user?.email}</TableCell>
+                    <TableCell>{submission.tasks?.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{submission.tasks?.task_type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedSubmission(submission)}
+                            className="flex items-center gap-1"
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="hidden md:inline">View</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[600px]">
+                          <DialogHeader>
+                            <DialogTitle>Submission Details</DialogTitle>
+                            <DialogDescription>Review the proof submitted by the user</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="font-semibold">Proof:</h4>
+                              <p className="text-muted-foreground">{selectedSubmission?.submission_proof.proof}</p>
+                            </div>
+                            {selectedSubmission?.submission_proof.additional_notes && (
+                              <div>
+                                <h4 className="font-semibold">Additional Notes:</h4>
+                                <p className="text-muted-foreground">{selectedSubmission?.submission_proof.additional_notes}</p>
+                              </div>
+                            )}
+                            {selectedSubmission?.submission_proof.image_url && (
+                              <div>
+                                <h4 className="font-semibold">Screenshot:</h4>
+                                <img src={selectedSubmission.submission_proof.image_url} alt="Submission proof" className="w-full h-48 object-contain rounded-lg border" />
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </TableCell>
+                    <TableCell>{getStatusBadge(submission.status)}</TableCell>
+                    <TableCell>{formatDate(submission.created_at)}</TableCell>
+                    <TableCell>
+                      {submission.status === "pending" && (
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleApprove(submission.id)}
+                            className="bg-green-600 hover:bg-green-700 flex items-center gap-1"
+                          >
+                            <Check className="h-4 w-4" />
+                            <span className="hidden md:inline">Approve</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleReject(submission.id)}
+                            className="flex items-center gap-1"
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="hidden md:inline">Reject</span>
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {submissions.map((submission) => (
+              <div key={submission.id} className="border rounded-lg p-3 bg-card/40">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-medium">{submission.user?.email}</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[220px]">{submission.tasks?.title}</div>
+                        <div className="mt-1 text-xs text-muted-foreground">{formatDate(submission.created_at)}</div>
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline">{submission.tasks?.task_type}</Badge>
+                        <div className="mt-2">{getStatusBadge(submission.status)}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex gap-2">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button size="sm" className="flex-1 flex items-center justify-center gap-2" onClick={() => setSelectedSubmission(submission)}>
+                            <Eye className="h-4 w-4" />
+                            <span>View</span>
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[600px]">
+                          <DialogHeader>
+                            <DialogTitle>Submission Details</DialogTitle>
+                            <DialogDescription>Review the proof submitted by the user</DialogDescription>
+                          </DialogHeader>
+                          <div className="space-y-4">
+                            <div>
+                              <h4 className="font-semibold">Proof:</h4>
+                              <p className="text-muted-foreground">{selectedSubmission?.submission_proof.proof}</p>
+                            </div>
+                            {selectedSubmission?.submission_proof.additional_notes && (
+                              <div>
+                                <h4 className="font-semibold">Additional Notes:</h4>
+                                <p className="text-muted-foreground">{selectedSubmission?.submission_proof.additional_notes}</p>
+                              </div>
+                            )}
+                            {selectedSubmission?.submission_proof.image_url && (
+                              <div>
+                                <h4 className="font-semibold">Screenshot:</h4>
+                                <img src={selectedSubmission.submission_proof.image_url} alt="Submission proof" className="w-full h-48 object-contain rounded-lg border" />
+                              </div>
+                            )}
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+
+                      {submission.status === "pending" && (
+                        <>
+                          <Button size="sm" className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => handleApprove(submission.id)}>
+                            <Check className="h-4 w-4 mr-2" />
+                            <span>Approve</span>
+                          </Button>
+                          <Button size="sm" variant="destructive" className="flex-1" onClick={() => handleReject(submission.id)}>
+                            <X className="h-4 w-4 mr-2" />
+                            <span>Reject</span>
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
 
       {submissions.length === 0 && (
         <div className="text-center py-12">
           <h3 className="text-lg font-medium">No submissions yet</h3>
-          <p className="text-muted-foreground">
-            Users haven't submitted any tasks for review yet.
-          </p>
+          <p className="text-muted-foreground">Users haven't submitted any tasks for review yet.</p>
         </div>
       )}
     </div>
   )
 }
 
-export default function AdminSubmissionsPage() {
+export function AdminSubmissionsPage() {
   return (
     <AuthProtected requireAdmin={true}>
       <AdminSubmissionsContent />

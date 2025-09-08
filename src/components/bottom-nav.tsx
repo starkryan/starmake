@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, ClipboardList, Gift, User } from "lucide-react"
+import { FaHome, FaList, FaGift, FaUser } from "react-icons/fa"
 import { cn } from "@/lib/utils"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { authClient } from "@/lib/auth-client"
@@ -12,22 +12,22 @@ const navigationItems = [
   {
     name: "Home",
     href: "/",
-    icon: Home,
+    icon: FaHome,
   },
   {
     name: "Task",
     href: "/tasks",
-    icon: ClipboardList,
+    icon: FaList,
   },
   {
     name: "Redeem",
     href: "/redeem",
-    icon: Gift,
+    icon: FaGift,
   },
   {
     name: "Profile",
     href: "/profile",
-    icon: User,
+    icon: FaUser,
   },
 ]
 

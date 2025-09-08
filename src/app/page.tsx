@@ -1,10 +1,13 @@
+"use client"
 import React from 'react'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TestimonialsSection } from '@/components/blocks/testimonials-with-marquee'
-import { FaThumbsUp, FaStar, FaPlay, FaClipboardList, FaMobile, FaUsers } from 'react-icons/fa6'
+import { motion } from "framer-motion"
+
+import { FaThumbsUp, FaStar, FaPlay, FaClipboardList, FaMobile, FaUsers, FaArrowRight, FaCheck, FaRupeeSign } from 'react-icons/fa6'
 
 function Page() {
   const earningOpportunities = [
@@ -107,34 +110,70 @@ function Page() {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section className="container mx-auto py-12 md:py-20 text-center px-4">
-        <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto">
-          <Badge variant="secondary" className="text-sm md:text-lg px-3 md:px-4 py-1">
-            Earn Real Money Online
-          </Badge>
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="space-y-4 md:space-y-6 max-w-4xl mx-auto"
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <Badge variant="secondary" className="text-sm md:text-lg px-3 md:px-4 py-1 hover-lift">
+              <FaRupeeSign className="inline mr-1" />
+              Earn Real Money Online
+            </Badge>
+          </motion.div>
+          
+          <motion.h1 
+            className="text-3xl md:text-5xl lg:text-7xl font-bold tracking-tight"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+          >
             Turn Your{' '}
-            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <motion.span 
+              className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+              initial={{ backgroundPosition: '0% 50%' }}
+              animate={{ backgroundPosition: '100% 50%' }}
+              transition={{ duration: 2, repeat: Infinity, repeatType: 'reverse' }}
+            >
               Free Time
-            </span>{' '}
+            </motion.span>{' '}
             Into Income
-          </h1>
-          <p className="text-base md:text-xl lg:text-2xl text-muted-foreground leading-relaxed">
+          </motion.h1>
+          
+          <motion.p 
+            className="text-base md:text-xl lg:text-2xl text-muted-foreground leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+          >
             Discover thousands of earning opportunities from social media engagement to hotel reviews. 
             Get paid for your time and creativity with instant withdrawals.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 md:pt-6">
+          </motion.p>
+          
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-3 justify-center pt-4 md:pt-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+          >
             <Link href="/login" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full sm:w-auto px-6 md:px-8">
+              <Button size="lg" className="w-full sm:w-auto px-6 md:px-8 hover-lift group">
                 Start Earning Now
+                <FaArrowRight className="ml-2 transition-transform group-hover:translate-x-1" />
               </Button>
             </Link>
             <Link href="/learn-more" className="w-full sm:w-auto">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 md:px-8">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 md:px-8 hover-lift">
                 Learn More
               </Button>
             </Link>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Earning Opportunities Section */}
@@ -148,30 +187,40 @@ function Page() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {earningOpportunities.map((opportunity, index) => (
-            <Card key={index} className="hover-lift transition-all duration-300">
-              <CardHeader className="p-4 md:p-6">
-                <div className="flex items-center justify-between mb-3 md:mb-4">
-                  <Badge variant="outline" className="text-xs md:text-sm">{opportunity.category}</Badge>
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-muted rounded-lg flex items-center justify-center">
-                    <opportunity.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              whileHover={{ y: -5 }}
+            >
+              <Card className="hover-lift transition-all duration-300 h-full flex flex-col">
+                <CardHeader className="p-4 md:p-6 flex-1">
+                  <div className="flex items-center justify-between mb-3 md:mb-4">
+                    <Badge variant="outline" className="text-xs md:text-sm">{opportunity.category}</Badge>
+                    <div className="w-10 h-10 md:w-12 md:h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <opportunity.icon className="w-5 h-5 md:w-6 md:h-6 text-primary" />
+                    </div>
                   </div>
-                </div>
-                <CardTitle className="text-xl md:text-2xl">{opportunity.title}</CardTitle>
-                <CardDescription className="text-sm md:text-lg">
-                  {opportunity.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 md:p-6">
-                <div className="flex items-center justify-between">
-                  <span className="font-semibold text-green-600 text-sm md:text-base">
-                    {opportunity.earnings}
-                  </span>
-                  <Button variant="ghost" size="sm" className="text-xs md:text-sm">
-                    Get Started →
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <CardTitle className="text-xl md:text-2xl">{opportunity.title}</CardTitle>
+                  <CardDescription className="text-sm md:text-lg mt-2">
+                    {opportunity.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 md:p-6 pt-0">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-green-600 text-sm md:text-base flex items-center">
+                      <FaRupeeSign className="mr-1" />
+                      {opportunity.earnings.replace('₹', '')}
+                    </span>
+                    <Button variant="ghost" size="sm" className="text-xs md:text-sm group">
+                      Get Started 
+                      <FaArrowRight className="ml-1 transition-transform group-hover:translate-x-1" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -179,41 +228,63 @@ function Page() {
       {/* How It Works Section */}
       <section className="bg-muted/50 py-12 md:py-20">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8 md:mb-12">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-8 md:mb-12"
+          >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
             <p className="text-base md:text-xl text-muted-foreground">
               Start earning in just 3 simple steps
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            <div className="text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4">
-                1
-              </div>
-              <h3 className="text-xl md:text-2xl font-semibold mb-2">Sign Up Free</h3>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Create your account and complete your profile in minutes
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4">
-                2
-              </div>
-              <h3 className="text-xl md:text-2xl font-semibold mb-2">Choose Tasks</h3>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Select from available earning opportunities that interest you
-              </p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4">
-                3
-              </div>
-              <h3 className="text-xl md:text-2xl font-semibold mb-2">Get Paid</h3>
-              <p className="text-sm md:text-base text-muted-foreground">
-                Complete tasks and receive instant payments to your UPI account
-              </p>
-            </div>
+            {[
+              { 
+                step: 1, 
+                title: "Sign Up Free", 
+                description: "Create your account and complete your profile in minutes",
+                icon: <FaCheck className="text-white" />
+              },
+              { 
+                step: 2, 
+                title: "Choose Tasks", 
+                description: "Select from available earning opportunities that interest you",
+                icon: <FaClipboardList className="text-white" />
+              },
+              { 
+                step: 3, 
+                title: "Get Paid", 
+                description: "Complete tasks and receive instant payments to your UPI account",
+                icon: <FaRupeeSign className="text-white" />
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -5 }}
+                className="text-center"
+              >
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-primary rounded-full flex items-center justify-center text-white text-xl md:text-2xl font-bold mx-auto mb-3 md:mb-4 hover-lift">
+                  {item.icon}
+                </div>
+                <motion.h3 
+                  className="text-xl md:text-2xl font-semibold mb-2"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  {item.title}
+                </motion.h3>
+                <p className="text-sm md:text-base text-muted-foreground">
+                  {item.description}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -227,22 +298,48 @@ function Page() {
 
       {/* CTA Section */}
       <section className="container mx-auto py-12 md:py-20 text-center px-4">
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl md:rounded-3xl p-6 md:p-12 text-white">
-          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl md:rounded-3xl p-6 md:p-12 text-white"
+        >
+          <motion.h2 
+            className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4 md:mb-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
             Ready to Start Earning?
-          </h2>
-          <p className="text-base md:text-xl mb-6 md:mb-8 opacity-90">
+          </motion.h2>
+          <motion.p 
+            className="text-base md:text-xl mb-6 md:mb-8 opacity-90"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
             Join our community of earners and start making money today
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button size="lg" variant="secondary" className="w-full sm:w-auto px-6 md:px-8">
-              Sign Up Free
-            </Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 md:px-8 text-black">
-              See All Opportunities
-            </Button>
-          </div>
-        </div>
+          </motion.p>
+          <motion.div 
+            className="flex flex-col sm:flex-row gap-3 justify-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <Link href="/signup" className="w-full sm:w-auto">
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto px-6 md:px-8 hover-lift group">
+                Sign Up Free
+                <FaArrowRight className="ml-2 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+            <Link href="/tasks" className="w-full sm:w-auto">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto px-6 md:px-8 text-black hover-lift">
+                See All Opportunities
+              </Button>
+            </Link>
+          </motion.div>
+        </motion.div>
       </section>
       {/* Spacer for bottom navigation on mobile */}
       <div className="h-16 md:hidden -mt-8"></div>

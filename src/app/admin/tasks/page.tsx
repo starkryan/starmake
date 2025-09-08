@@ -18,6 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { FaPlus, FaPlay, FaPause, FaCheck, FaTasks, FaInstagram, FaYoutube, FaVideo, FaFileAlt, FaPoll, FaMobile, FaQuestion } from "react-icons/fa"
 
 interface Task {
   id: string
@@ -33,7 +34,29 @@ interface Task {
   created_by: string | null
 }
 
-function AdminTasksContent() {
+function formatDate(input?: string) {
+  if (!input) return "-"
+  try {
+    return new Date(input).toLocaleDateString()
+  } catch {
+    return input as string
+  }
+}
+
+function getTaskTypeConfig(taskType: string) {
+  const configMap: Record<string, { label: string; icon: React.ReactNode }> = {
+    instagram: { label: "Instagram", icon: <FaInstagram className="w-3 h-3" /> },
+    youtube: { label: "YouTube", icon: <FaYoutube className="w-3 h-3" /> },
+    video: { label: "Video", icon: <FaVideo className="w-3 h-3" /> },
+    content: { label: "Content", icon: <FaFileAlt className="w-3 h-3" /> },
+    survey: { label: "Survey", icon: <FaPoll className="w-3 h-3" /> },
+    app_test: { label: "App Test", icon: <FaMobile className="w-3 h-3" /> },
+    other: { label: "Other", icon: <FaQuestion className="w-3 h-3" /> }
+  }
+  return configMap[taskType] || { label: taskType, icon: <FaQuestion className="w-3 h-3" /> }
+}
+
+export default function AdminTasksContent() {
   const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -50,7 +73,7 @@ function AdminTasksContent() {
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setTasks(data || [])
+      setTasks((data as Task[]) || [])
     } catch (error) {
       console.error("Error fetching tasks:", error)
       toast.error("Failed to fetch tasks")
@@ -76,19 +99,6 @@ function AdminTasksContent() {
     }
   }
 
-  const getTaskTypeBadge = (taskType: string) => {
-    const typeMap: Record<string, string> = {
-      instagram: "Instagram",
-      youtube: "YouTube",
-      video: "Video",
-      content: "Content",
-      survey: "Survey",
-      app_test: "App Test",
-      other: "Other"
-    }
-    return typeMap[taskType] || taskType
-  }
-
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
@@ -98,7 +108,7 @@ function AdminTasksContent() {
       case "completed":
         return <Badge variant="outline">Completed</Badge>
       default:
-        return <Badge variant="outline">{status}</Badge>
+        return <Badge variant="outline" className="capitalize">{status}</Badge>
     }
   }
 
@@ -111,19 +121,27 @@ function AdminTasksContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 pb-24 space-y-6">
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">Task Management</h1>
+        <div className="flex items-center gap-3">
+          <FaTasks className="w-6 h-6" />
+          <h1 className="text-2xl md:text-3xl font-bold">Task Management</h1>
+        </div>
+
+        {/* Dialog trigger: full width on mobile for easier tapping */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="w-full sm:w-auto">Create New Task</Button>
+            <Button className="w-full sm:w-auto flex items-center justify-center gap-2">
+              <FaPlus />
+              <span className="hidden sm:inline">Create New Task</span>
+              <span className="sm:hidden">New Task</span>
+            </Button>
           </DialogTrigger>
+
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle>Create New Task</DialogTitle>
-              <DialogDescription>
-                Create a new task for users to complete
-              </DialogDescription>
+              <DialogDescription>Create a new task for users to complete</DialogDescription>
             </DialogHeader>
             <TaskCreateForm
               onTaskCreated={() => {
@@ -141,78 +159,150 @@ function AdminTasksContent() {
           <CardDescription>Manage and monitor all created tasks</CardDescription>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>MB Limit</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tasks.map((task) => (
-                <TableRow key={task.id}>
-                  <TableCell className="font-medium">{task.title}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{getTaskTypeBadge(task.task_type)}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {task.is_free ? (
-                      <Badge variant="secondary">Free</Badge>
-                    ) : (
-                      `₹${task.price}`
-                    )}
-                  </TableCell>
-                  <TableCell>{task.mb_limit || "-"}</TableCell>
-                  <TableCell>{getStatusBadge(task.status)}</TableCell>
-                  <TableCell>
-                    {new Date(task.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Price</TableHead>
+                  <TableHead>MB Limit</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tasks.map((task) => (
+                  <TableRow key={task.id}>
+                    <TableCell className="font-medium">{task.title}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        {getTaskTypeConfig(task.task_type).icon}
+                        {getTaskTypeConfig(task.task_type).label}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {task.is_free ? <Badge variant="secondary">Free</Badge> : `₹${task.price}`}
+                    </TableCell>
+                    <TableCell>{task.mb_limit ?? "-"}</TableCell>
+                    <TableCell>{getStatusBadge(task.status)}</TableCell>
+                    <TableCell>{formatDate(task.created_at)}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleTaskStatusChange(task.id, "active")}
+                          disabled={task.status === "active"}
+                          className="flex items-center gap-1"
+                        >
+                          <FaPlay className="w-3 h-3" />
+                          <span className="hidden md:inline">Activate</span>
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleTaskStatusChange(task.id, "paused")}
+                          disabled={task.status === "paused"}
+                          className="flex items-center gap-1"
+                        >
+                          <FaPause className="w-3 h-3" />
+                          <span className="hidden md:inline">Pause</span>
+                        </Button>
+
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleTaskStatusChange(task.id, "completed")}
+                          disabled={task.status === "completed"}
+                          className="flex items-center gap-1"
+                        >
+                          <FaCheck className="w-3 h-3" />
+                          <span className="hidden md:inline">Complete</span>
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {tasks.map((task) => (
+              <div key={task.id} className="border rounded-lg p-3 bg-card/40">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="font-medium">{task.title}</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[220px]">{task.description}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">{task.is_free ? "Free" : `₹${task.price}`}</div>
+                        <div className="text-xs text-muted-foreground">{formatDate(task.created_at)}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center gap-2">
+                      <Badge variant="outline" className="flex items-center gap-1">
+                        {getTaskTypeConfig(task.task_type).icon}
+                        <span className="text-xs">{getTaskTypeConfig(task.task_type).label}</span>
+                      </Badge>
+
+                      <div className="ml-2">{getStatusBadge(task.status)}</div>
+                    </div>
+
+                    <div className="mt-3 flex gap-2 flex-wrap">
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleTaskStatusChange(task.id, "active")}
                         disabled={task.status === "active"}
+                        className="flex-1"
                       >
-                        Activate
+                        <FaPlay className="w-3 h-3 mr-2" />
+                        <span>Activate</span>
                       </Button>
+
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleTaskStatusChange(task.id, "paused")}
                         disabled={task.status === "paused"}
+                        className="flex-1"
                       >
-                        Pause
+                        <FaPause className="w-3 h-3 mr-2" />
+                        <span>Pause</span>
                       </Button>
+
                       <Button
                         size="sm"
                         variant="outline"
                         onClick={() => handleTaskStatusChange(task.id, "completed")}
                         disabled={task.status === "completed"}
+                        className="flex-1"
                       >
-                        Complete
+                        <FaCheck className="w-3 h-3 mr-2" />
+                        <span>Complete</span>
                       </Button>
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
-
- 
     </div>
   )
 }
 
-export default function AdminTasks() {
+export function AdminTasks() {
   return (
     <AuthProtected requireAdmin={true}>
       <AdminTasksContent />

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -61,7 +61,6 @@ interface SalaryCode {
   expires_at: string;
 }
 
-// Zod schema for salary code generation
 const salaryCodeSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   phone: z.string().min(10, 'Phone number must be at least 10 digits').regex(/^\d+$/, 'Phone number must contain only digits'),
@@ -80,11 +79,13 @@ interface RedeemRequest {
   salary_codes?: SalaryCode[];
 }
 
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  created_at: string;
+function formatDate(input?: string) {
+  if (!input) return '-';
+  try {
+    return new Date(input).toLocaleDateString();
+  } catch {
+    return input;
+  }
 }
 
 function AdminDashboardContent() {
@@ -94,12 +95,7 @@ function AdminDashboardContent() {
 
   const form = useForm<z.infer<typeof salaryCodeSchema>>({
     resolver: zodResolver(salaryCodeSchema),
-    defaultValues: {
-      name: '',
-      phone: '',
-      task: '',
-      price: ''
-    }
+    defaultValues: { name: '', phone: '', task: '', price: '' }
   });
 
   useEffect(() => {
@@ -108,7 +104,6 @@ function AdminDashboardContent() {
 
   const fetchData = async () => {
     try {
-      // Fetch salary codes
       const { data: codesData, error: codesError } = await supabase
         .from('salary_codes')
         .select('*')
@@ -116,55 +111,34 @@ function AdminDashboardContent() {
 
       if (codesError) throw codesError;
 
-      // Fetch redeem requests with salary code details
       const { data: requestsData, error: requestsError } = await supabase
         .from('redeem_requests')
-        .select(`
-          *,
-          salary_codes (*)
-        `)
+        .select(`*, salary_codes (*)`)
         .order('created_at', { ascending: false });
 
       if (requestsError) throw requestsError;
 
-      setSalaryCodes(codesData || []);
-      setRedeemRequests(requestsData || []);
+      setSalaryCodes((codesData as SalaryCode[]) || []);
+      setRedeemRequests((requestsData as RedeemRequest[]) || []);
     } catch (error) {
       console.error('Error fetching data:', error);
+      toast.error('Failed to fetch admin data');
     } finally {
       setLoading(false);
     }
   };
 
-  const generateAlphanumericCode = (length = 9) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-      result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-  };
-
   const generateSalaryCode = async (values: z.infer<typeof salaryCodeSchema>) => {
     try {
-      // Call the API endpoint instead of direct database access
       const response = await fetch('/api/admin/generate-code', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       });
-
       const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to generate salary code');
-      }
-
+      if (!response.ok) throw new Error(result.error || 'Failed to generate salary code');
       form.reset();
-      fetchData(); // Refresh data
-      
+      fetchData();
       toast.success(`Salary code generated: ${result.code}`);
     } catch (error) {
       console.error('Error generating salary code:', error);
@@ -176,15 +150,10 @@ function AdminDashboardContent() {
     try {
       const { error } = await supabase
         .from('redeem_requests')
-        .update({ 
-          status: 'approved',
-          approved_at: new Date().toISOString()
-        })
+        .update({ status: 'approved', approved_at: new Date().toISOString() })
         .eq('id', requestId);
-
       if (error) throw error;
-
-      fetchData(); // Refresh data
+      fetchData();
       toast.success('Request approved successfully');
     } catch (error) {
       console.error('Error approving request:', error);
@@ -196,15 +165,10 @@ function AdminDashboardContent() {
     try {
       const { error } = await supabase
         .from('redeem_requests')
-        .update({ 
-          status: 'rejected',
-          rejected_at: new Date().toISOString()
-        })
+        .update({ status: 'rejected', rejected_at: new Date().toISOString() })
         .eq('id', requestId);
-
       if (error) throw error;
-
-      fetchData(); // Refresh data
+      fetchData();
       toast.success('Request rejected successfully');
     } catch (error) {
       console.error('Error rejecting request:', error);
@@ -212,16 +176,14 @@ function AdminDashboardContent() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Spinner className="h-8 w-8" />
-      </div>
-    );
-  }
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <Spinner className="h-8 w-8" />
+    </div>
+  );
 
   return (
-    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
+    <div className="max-w-6xl mx-auto p-4 sm:p-6 pb-24 space-y-6">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <BarChart3 className="h-8 w-8 text-primary" />
@@ -229,13 +191,13 @@ function AdminDashboardContent() {
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="gap-2">
-            <a href="/admin/users">
+            <a href="/admin/users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Manage Users</span>
             </a>
           </Button>
           <Button asChild variant="outline" className="gap-2">
-            <a href="/admin/tasks">
+            <a href="/admin/tasks" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">Tasks</span>
             </a>
@@ -244,29 +206,29 @@ function AdminDashboardContent() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-md md:w-[400px]">
-          <TabsTrigger value="overview" className="gap-2 text-xs md:text-sm">
-            <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
-            Overview
+        <TabsList className="flex gap-2 overflow-x-auto pb-1">
+          <TabsTrigger value="overview" className="flex items-center gap-2 whitespace-nowrap text-xs md:text-sm">
+            <BarChart3 className="h-4 w-4" />
+            <span>Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="codes" className="gap-2 text-xs md:text-sm">
-            <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
-            Codes
+          <TabsTrigger value="codes" className="flex items-center gap-2 whitespace-nowrap text-xs md:text-sm">
+            <CreditCard className="h-4 w-4" />
+            <span>Codes</span>
           </TabsTrigger>
-          <TabsTrigger value="requests" className="gap-2 text-xs md:text-sm">
-            <FileText className="h-3 w-3 md:h-4 md:w-4" />
-            Requests
+          <TabsTrigger value="requests" className="flex items-center gap-2 whitespace-nowrap text-xs md:text-sm">
+            <FileText className="h-4 w-4" />
+            <span>Requests</span>
           </TabsTrigger>
-          <TabsTrigger value="generate" className="gap-2 text-xs md:text-sm">
-            <PlusCircle className="h-3 w-3 md:h-4 md:w-4" />
-            Generate
+          <TabsTrigger value="generate" className="flex items-center gap-2 whitespace-nowrap text-xs md:text-sm">
+            <PlusCircle className="h-4 w-4" />
+            <span>Generate</span>
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
           <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card>
+              <CardHeader className="flex items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
                 <Users className="h-4 w-4 text-blue-600" />
               </CardHeader>
@@ -276,8 +238,8 @@ function AdminDashboardContent() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card>
+              <CardHeader className="flex items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Salary Codes</CardTitle>
                 <CreditCard className="h-4 w-4 text-green-600" />
               </CardHeader>
@@ -287,15 +249,13 @@ function AdminDashboardContent() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <Card>
+              <CardHeader className="flex items-center justify-between pb-2">
                 <CardTitle className="text-sm font-medium">Pending Requests</CardTitle>
                 <FileText className="h-4 w-4 text-amber-600" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
-                  {redeemRequests.filter(r => r.status === 'pending').length}
-                </div>
+                <div className="text-2xl font-bold">{redeemRequests.filter(r => r.status === 'pending').length}</div>
                 <p className="text-xs text-muted-foreground">Awaiting approval</p>
               </CardContent>
             </Card>
@@ -309,7 +269,8 @@ function AdminDashboardContent() {
               <CardDescription>All salary codes created by the system</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -331,20 +292,39 @@ function AdminDashboardContent() {
                         <TableCell className="max-w-xs truncate text-sm">{code.task}</TableCell>
                         <TableCell className="font-medium text-sm">₹{code.price}</TableCell>
                         <TableCell>
-                          <Badge variant={
-                            code.status === 'active' ? 'default' :
-                            code.status === 'redeemed' ? 'secondary' : 'outline'
-                          }>
+                          <Badge variant={code.status === 'active' ? 'default' : code.status === 'redeemed' ? 'secondary' : 'outline'}>
                             {code.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {new Date(code.created_at).toLocaleDateString()}
-                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{formatDate(code.created_at)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+
+              {/* Mobile list */}
+              <div className="md:hidden space-y-3">
+                {salaryCodes.map(code => (
+                  <div key={code.id} className="border rounded-lg p-3 bg-card/40">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-mono font-medium text-sm">{code.code}</div>
+                        <div className="text-sm font-medium">{code.name}</div>
+                        <div className="text-xs text-muted-foreground truncate max-w-[220px]">{code.task}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">₹{code.price}</div>
+                        <div className="text-xs text-muted-foreground">{formatDate(code.created_at)}</div>
+                        <div className="mt-1">
+                          <Badge variant={code.status === 'active' ? 'default' : code.status === 'redeemed' ? 'secondary' : 'outline'}>
+                            {code.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -357,7 +337,7 @@ function AdminDashboardContent() {
               <CardDescription>Manage redemption requests from users</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -375,34 +355,18 @@ function AdminDashboardContent() {
                         <TableCell className="font-medium text-sm">{request.user_name}</TableCell>
                         <TableCell className="text-sm">{request.user_phone}</TableCell>
                         <TableCell className="max-w-xs truncate text-sm">{request.upi_id}</TableCell>
-                        <TableCell className="font-mono text-sm">
-                          {request.salary_codes?.[0]?.code}
-                        </TableCell>
+                        <TableCell className="font-mono text-sm">{request.salary_codes?.[0]?.code}</TableCell>
                         <TableCell>
-                          <Badge variant={
-                            request.status === 'pending' ? 'secondary' :
-                            request.status === 'approved' ? 'default' : 'destructive'
-                          }>
-                            {request.status}
-                          </Badge>
+                          <Badge variant={request.status === 'pending' ? 'secondary' : request.status === 'approved' ? 'default' : 'destructive'}>{request.status}</Badge>
                         </TableCell>
                         <TableCell>
                           {request.status === 'pending' && (
                             <div className="flex flex-col sm:flex-row gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleApproveRequest(request.id)}
-                                className="gap-1"
-                              >
+                              <Button size="sm" onClick={() => handleApproveRequest(request.id)} className="gap-1">
                                 <CheckCircle className="h-3 w-3" />
                                 Approve
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => handleRejectRequest(request.id)}
-                                className="gap-1"
-                              >
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectRequest(request.id)} className="gap-1">
                                 <XCircle className="h-3 w-3" />
                                 Reject
                               </Button>
@@ -414,6 +378,35 @@ function AdminDashboardContent() {
                   </TableBody>
                 </Table>
               </div>
+
+              {/* Mobile cards */}
+              <div className="md:hidden space-y-3">
+                {redeemRequests.map(r => (
+                  <div key={r.id} className="border rounded-lg p-3 bg-card/40">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="font-medium text-sm">{r.user_name}</div>
+                        <div className="text-xs text-muted-foreground">{r.user_phone} • {formatDate(r.created_at)}</div>
+                        <div className="mt-1 font-mono text-sm">{r.salary_codes?.[0]?.code}</div>
+                        <div className="mt-1">
+                          <Badge variant={r.status === 'pending' ? 'secondary' : r.status === 'approved' ? 'default' : 'destructive'}>
+                            {r.status}
+                          </Badge>
+                        </div>
+                        <div className="mt-2 text-xs text-muted-foreground truncate max-w-[240px]">{r.upi_id}</div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        {r.status === 'pending' && (
+                          <>
+                            <Button size="sm" onClick={() => handleApproveRequest(r.id)} className="gap-1">Approve</Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleRejectRequest(r.id)} className="gap-1">Reject</Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -421,73 +414,60 @@ function AdminDashboardContent() {
         <TabsContent value="generate">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <PlusCircle className="h-5 w-5" />
-                Generate Salary Code
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><PlusCircle className="h-5 w-5" /> Generate Salary Code</CardTitle>
               <CardDescription>Create a new 9-digit salary code for tasks</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(generateSalaryCode)} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone</FormLabel>
-                          <FormControl>
-                            <Input type="tel" placeholder="Enter phone number" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <FormField control={form.control} name="name" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <FormField control={form.control} name="phone" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <Input type="tel" placeholder="Enter phone number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
                   </div>
-                  <FormField
-                    control={form.control}
-                    name="task"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Task Description</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Describe the task" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="price"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Price (₹)</FormLabel>
-                        <FormControl>
-                          <Input type="number" step="0.01" placeholder="Enter price" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="gap-2">
-                    <PlusCircle className="h-4 w-4" />
-                    Generate Salary Code
-                  </Button>
+
+                  <FormField control={form.control} name="task" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Task Description</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Describe the task" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
+                  <FormField control={form.control} name="price" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price (₹)</FormLabel>
+                      <FormControl>
+                        <Input type="number" step="0.01" placeholder="Enter price" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+
+                  <div className="flex justify-end">
+                    <Button type="submit" className="gap-2">
+                      <PlusCircle className="h-4 w-4" />
+                      Generate Salary Code
+                    </Button>
+                  </div>
                 </form>
               </Form>
             </CardContent>
