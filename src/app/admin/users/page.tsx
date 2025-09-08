@@ -122,7 +122,7 @@ function UsersManagementContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Users className="h-8 w-8 text-primary" />

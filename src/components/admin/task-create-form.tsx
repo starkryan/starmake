@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { FaClipboardList, FaCode } from "react-icons/fa6"
 import {
   Select,
   SelectContent,
@@ -116,9 +117,18 @@ export default function TaskCreateForm({ onTaskCreated }: TaskCreateFormProps) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea placeholder="Describe the task requirements" {...field} />
-              </FormControl>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 pt-3 flex items-center pointer-events-none">
+                  <FaClipboardList className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <FormControl>
+                  <Textarea 
+                    placeholder="Describe the task requirements" 
+                    {...field} 
+                    className="pl-10"
+                  />
+                </FormControl>
+              </div>
               <FormMessage />
             </FormItem>
           )}

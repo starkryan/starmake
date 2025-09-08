@@ -13,6 +13,7 @@ import AuthProtected from "@/components/auth/auth-protected"
 import { Spinner } from "@/components/ui/spinner"
 import { authClient } from "@/lib/auth-client"
 import { Upload, X } from "lucide-react"
+import { FaClipboardList } from "react-icons/fa6"
 
 interface Task {
   id: string
@@ -300,11 +301,17 @@ function TaskCompletionContent() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Additional Notes (Optional)</label>
-              <Textarea
-                placeholder="Any additional information or comments..."
-                value={submissionData.additional_notes}
-                onChange={(e) => setSubmissionData({...submissionData, additional_notes: e.target.value})}
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 pt-3 flex items-center pointer-events-none">
+                  <FaClipboardList className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <Textarea
+                  placeholder="Any additional information or comments..."
+                  value={submissionData.additional_notes}
+                  onChange={(e) => setSubmissionData({...submissionData, additional_notes: e.target.value})}
+                  className="pl-10"
+                />
+              </div>
             </div>
 
             <Button 

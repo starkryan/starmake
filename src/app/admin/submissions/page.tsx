@@ -128,10 +128,10 @@ function AdminSubmissionsContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Task Submissions</h1>
-        <Button onClick={fetchSubmissions} variant="outline">
+    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold">Task Submissions</h1>
+        <Button onClick={fetchSubmissions} variant="outline" className="w-full sm:w-auto">
           Refresh
         </Button>
       </div>

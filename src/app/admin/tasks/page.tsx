@@ -111,12 +111,12 @@ function AdminTasksContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Task Management</h1>
+    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold">Task Management</h1>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button>Create New Task</Button>
+            <Button className="w-full sm:w-auto">Create New Task</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
@@ -207,47 +207,7 @@ function AdminTasksContent() {
         </CardContent>
       </Card>
 
-      {/* Requirements Preview Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Task Requirements Guide</CardTitle>
-          <CardDescription>Example JSON requirements for different task types</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h4 className="font-semibold mb-2">Instagram Posts:</h4>
-            <pre className="bg-muted p-3 rounded text-sm">
-{`{
-  "min_followers": 1000,
-  "hashtags": ["#SalaryWork", "#EarnOnline"],
-  "min_likes": 50,
-  "min_comments": 5
-}`}</pre>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">YouTube Videos:</h4>
-            <pre className="bg-muted p-3 rounded text-sm">
-{`{
-  "min_views": 1000,
-  "min_duration": 60,
-  "required_tags": ["earning", "online"],
-  "min_likes": 100
-}`}</pre>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-2">App Testing:</h4>
-            <pre className="bg-muted p-3 rounded text-sm">
-{`{
-  "device_requirements": ["android", "ios"],
-  "testing_time": 30,
-  "report_required": true,
-  "screenshots_required": 3
-}`}</pre>
-          </div>
-        </CardContent>
-      </Card>
+ 
     </div>
   )
 }

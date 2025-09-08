@@ -221,50 +221,50 @@ function AdminDashboardContent() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="container mx-auto p-6 pb-20 md:pb-6 space-y-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <BarChart3 className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Admin Dashboard</h1>
         </div>
         <div className="flex gap-2">
           <Button asChild variant="outline" className="gap-2">
             <a href="/admin/users">
               <Users className="h-4 w-4" />
-              Manage Users
+              <span className="hidden sm:inline">Manage Users</span>
             </a>
           </Button>
           <Button asChild variant="outline" className="gap-2">
             <a href="/admin/tasks">
               <FileText className="h-4 w-4" />
-              Tasks
+              <span className="hidden sm:inline">Tasks</span>
             </a>
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 lg:w-[400px]">
-          <TabsTrigger value="overview" className="gap-2">
-            <BarChart3 className="h-4 w-4" />
+        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full max-w-md md:w-[400px]">
+          <TabsTrigger value="overview" className="gap-2 text-xs md:text-sm">
+            <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
             Overview
           </TabsTrigger>
-          <TabsTrigger value="codes" className="gap-2">
-            <CreditCard className="h-4 w-4" />
-            Salary Codes
+          <TabsTrigger value="codes" className="gap-2 text-xs md:text-sm">
+            <CreditCard className="h-3 w-3 md:h-4 md:w-4" />
+            Codes
           </TabsTrigger>
-          <TabsTrigger value="requests" className="gap-2">
-            <FileText className="h-4 w-4" />
+          <TabsTrigger value="requests" className="gap-2 text-xs md:text-sm">
+            <FileText className="h-3 w-3 md:h-4 md:w-4" />
             Requests
           </TabsTrigger>
-          <TabsTrigger value="generate" className="gap-2">
-            <PlusCircle className="h-4 w-4" />
+          <TabsTrigger value="generate" className="gap-2 text-xs md:text-sm">
+            <PlusCircle className="h-3 w-3 md:h-4 md:w-4" />
             Generate
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
             <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -309,41 +309,43 @@ function AdminDashboardContent() {
               <CardDescription>All salary codes created by the system</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Code</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Task</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {salaryCodes.map((code) => (
-                    <TableRow key={code.id}>
-                      <TableCell className="font-mono font-medium">{code.code}</TableCell>
-                      <TableCell>{code.name}</TableCell>
-                      <TableCell>{code.phone}</TableCell>
-                      <TableCell className="max-w-xs truncate">{code.task}</TableCell>
-                      <TableCell className="font-medium">₹{code.price}</TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          code.status === 'active' ? 'default' :
-                          code.status === 'redeemed' ? 'secondary' : 'outline'
-                        }>
-                          {code.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {new Date(code.created_at).toLocaleDateString()}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>Task</TableHead>
+                      <TableHead>Price</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Created</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {salaryCodes.map((code) => (
+                      <TableRow key={code.id}>
+                        <TableCell className="font-mono font-medium text-sm">{code.code}</TableCell>
+                        <TableCell className="text-sm">{code.name}</TableCell>
+                        <TableCell className="text-sm">{code.phone}</TableCell>
+                        <TableCell className="max-w-xs truncate text-sm">{code.task}</TableCell>
+                        <TableCell className="font-medium text-sm">₹{code.price}</TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            code.status === 'active' ? 'default' :
+                            code.status === 'redeemed' ? 'secondary' : 'outline'
+                          }>
+                            {code.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(code.created_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -355,61 +357,63 @@ function AdminDashboardContent() {
               <CardDescription>Manage redemption requests from users</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>User</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>UPI ID</TableHead>
-                    <TableHead>Salary Code</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {redeemRequests.map((request) => (
-                    <TableRow key={request.id}>
-                      <TableCell className="font-medium">{request.user_name}</TableCell>
-                      <TableCell>{request.user_phone}</TableCell>
-                      <TableCell className="max-w-xs truncate">{request.upi_id}</TableCell>
-                      <TableCell className="font-mono">
-                        {request.salary_codes?.[0]?.code}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={
-                          request.status === 'pending' ? 'secondary' :
-                          request.status === 'approved' ? 'default' : 'destructive'
-                        }>
-                          {request.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {request.status === 'pending' && (
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              onClick={() => handleApproveRequest(request.id)}
-                              className="gap-1"
-                            >
-                              <CheckCircle className="h-3 w-3" />
-                              Approve
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleRejectRequest(request.id)}
-                              className="gap-1"
-                            >
-                              <XCircle className="h-3 w-3" />
-                              Reject
-                            </Button>
-                          </div>
-                        )}
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>User</TableHead>
+                      <TableHead>Phone</TableHead>
+                      <TableHead>UPI ID</TableHead>
+                      <TableHead>Salary Code</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {redeemRequests.map((request) => (
+                      <TableRow key={request.id}>
+                        <TableCell className="font-medium text-sm">{request.user_name}</TableCell>
+                        <TableCell className="text-sm">{request.user_phone}</TableCell>
+                        <TableCell className="max-w-xs truncate text-sm">{request.upi_id}</TableCell>
+                        <TableCell className="font-mono text-sm">
+                          {request.salary_codes?.[0]?.code}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={
+                            request.status === 'pending' ? 'secondary' :
+                            request.status === 'approved' ? 'default' : 'destructive'
+                          }>
+                            {request.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {request.status === 'pending' && (
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => handleApproveRequest(request.id)}
+                                className="gap-1"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleRejectRequest(request.id)}
+                                className="gap-1"
+                              >
+                                <XCircle className="h-3 w-3" />
+                                Reject
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
